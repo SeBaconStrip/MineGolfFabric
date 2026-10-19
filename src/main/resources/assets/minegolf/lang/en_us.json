@@ -1,0 +1,20 @@
+{
+  "itemGroup.minegolf.golf": "MineGolf",
+  "item.minegolf.golf_ball": "Golf Ball",
+  "item.minegolf.driver": "Driver",
+  "item.minegolf.iron": "Iron",
+  "item.minegolf.wedge": "Wedge",
+  "item.minegolf.putter": "Putter",
+  "item.minegolf.golf_bag": "Golf Bag",
+  "item.minegolf.course_book": "Course Book",
+  "block.minegolf.tee_box": "Tee Box",
+  "block.minegolf.cup": "Cup",
+  "block.minegolf.flag": "Flag",
+  "block.minegolf.fairway": "Fairway",
+  "block.minegolf.rough": "Rough",
+  "block.minegolf.green": "Green",
+  "block.minegolf.bunker_sand": "Bunker Sand",
+  "entity.minegolf.golf_ball": "Golf Ball",
+  "key.categories.minegolf.minegolf": "MineGolf",
+  "key.minegolf.cycle_club": "Next Club from Bag"
+}

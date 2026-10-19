@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:green_dye"
+  ],
+  "result": {
+    "id": "minegolf:course_book",
+    "count": 1
+  }
+}

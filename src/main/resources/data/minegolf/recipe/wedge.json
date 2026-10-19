@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    " S",
+    " S",
+    "I "
+  ],
+  "result": {
+    "id": "minegolf:wedge",
+    "count": 1
+  }
+}

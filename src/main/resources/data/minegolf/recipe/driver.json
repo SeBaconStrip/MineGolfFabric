@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "P": "#minecraft:planks"
+  },
+  "pattern": [
+    " S",
+    " S",
+    "PP"
+  ],
+  "result": {
+    "id": "minegolf:driver",
+    "count": 1
+  }
+}

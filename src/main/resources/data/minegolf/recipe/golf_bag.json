@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "-": "minecraft:string"
+  },
+  "pattern": [
+    "L-L",
+    "L L",
+    "LLL"
+  ],
+  "result": {
+    "id": "minegolf:golf_bag",
+    "count": 1
+  }
+}

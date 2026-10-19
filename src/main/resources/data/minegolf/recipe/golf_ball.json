@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bone_meal",
+    "minecraft:slime_ball",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "minegolf:golf_ball",
+    "count": 2
+  }
+}

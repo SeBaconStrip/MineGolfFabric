@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": "minecraft:green_carpet",
+    "P": "#minecraft:planks"
+  },
+  "pattern": [
+    "CCC",
+    "PPP"
+  ],
+  "result": {
+    "id": "minegolf:tee_box",
+    "count": 6
+  }
+}

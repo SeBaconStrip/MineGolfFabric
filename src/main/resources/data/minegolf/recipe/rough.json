@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:grass_block",
+    "minecraft:grass_block",
+    "minecraft:grass_block",
+    "minecraft:grass_block",
+    "minecraft:short_grass"
+  ],
+  "result": {
+    "id": "minegolf:rough",
+    "count": 4
+  }
+}

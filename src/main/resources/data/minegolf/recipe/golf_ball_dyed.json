@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "dye": "#minecraft:dyes",
+  "group": "dyed_golf_ball",
+  "result": {
+    "id": "minegolf:golf_ball"
+  },
+  "target": "minegolf:golf_ball"
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "W": "minecraft:red_wool",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "W",
+    "S",
+    "S"
+  ],
+  "result": {
+    "id": "minegolf:flag",
+    "count": 1
+  }
+}
