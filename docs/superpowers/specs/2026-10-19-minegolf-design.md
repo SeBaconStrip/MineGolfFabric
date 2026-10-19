@@ -37,8 +37,8 @@ then play them alone or together with clubs, balls and a golf bag.
   | Wedge | 50° | ~25 blocks | ignores bunker penalty |
   | Putter | 0° (ground roll) | ~15 blocks roll on green | — |
 
-- **Golf Bag** (`golf_bag`), stack 1. Holds 4 club slots + 16 ball slots in a
-  `DataComponents.CONTAINER`. Right-click opens a bag screen. While the bag is anywhere in the
+- **Golf Bag** (`golf_bag`), stack 1. Holds 5 slots in a `DataComponents.CONTAINER`
+  (4 clubs + 1 ball stack of up to 16), shown in the vanilla hopper screen. Right-click opens a bag screen. While the bag is anywhere in the
   inventory, key `R` (rebindable, category MineGolf) swaps the club in the main hand with the next
   club in the bag (Driver → Iron → Wedge → Putter → Driver). Empty hand takes the first club.
 - **Course Book** (`course_book`), stack 1. Unbound book creates a course; bound book
@@ -48,16 +48,18 @@ then play them alone or together with clubs, balls and a golf bag.
 
 - **Tee Box** (`tee_box`): slab-height mat. A ball is teed by right-clicking it with a golf ball.
 - **Cup** (`cup`): full block looking like green turf with a hole. Counts as green for physics.
-- **Flag** (`flag`): 2-tall decoration (double block like tall flowers), no collision.
+- **Flag** (`flag`): one block whose model is 2 blocks tall, no collision.
 - **Turf**: `fairway`, `rough`, `green`, `bunker_sand` (falls like sand).
 
-  | Surface | Restitution | Rolling friction (×/tick) | Lie modifier |
-  |---|---|---|---|
-  | Green, Cup | 0.20 | 0.985 | 100% |
-  | Fairway, Tee Box | 0.35 | 0.95 | 100% |
-  | Rough + all other vanilla blocks | 0.15 | 0.85 | 75% |
-  | Bunker Sand, vanilla sand/red sand | 0.0 | 0.60 | 40% (Wedge 100%) |
-  | Ice variants | 0.30 | 0.995 | 100% |
+  | Surface | Restitution | Rolling friction (×/tick) | Speed kept on landing | Lie modifier |
+  |---|---|---|---|---|
+  | Green, Cup | 0.20 | 0.985 | 70% | 100% |
+  | Fairway, Tee Box | 0.35 | 0.92 | 75% | 100% |
+  | Rough + all other vanilla blocks | 0.15 | 0.80 | 50% | 75% |
+  | Bunker Sand, vanilla sand/red sand | 0.0 | 0.60 | 10% | 40% (Wedge 100%) |
+  | Ice variants | 0.30 | 0.995 | 95% | 100% |
+
+  Club speeds (blocks/tick at 100 %): Driver 3.48, Iron 2.03, Wedge 1.28, Putter 0.23.
 
   Surface lookup is a block tag per surface (`minegolf:surface/green` etc.), so packs can extend it.
 - **Hazards**: ball touching water or lava, or falling below the world minimum → +1 penalty
@@ -84,9 +86,10 @@ then play them alone or together with clubs, balls and a golf bag.
    drops to 0 % (no indefinite full power). A power bar renders above the hotbar.
 3. While charging, the client draws the **aim line**: particles along the first 30 ticks of the
    predicted flight from `BallPhysics`, ignoring blocks after the first ground contact.
-4. On release the client sends `ShotPayload(power, yaw)`. The server validates: own ball, distance,
-   ball at rest, club allowed for the lie, power in [0,1]. Valid → velocity set, +1 stroke,
-   swing sound. Invalid → action bar message, nothing happens.
+4. Charging uses vanilla item use, so the release (`releaseUsing`) runs on the server with the
+   held ticks and the player's yaw; no shot packet exists. The server validates own ball,
+   distance, ball at rest and club allowed for the lie when use starts. Valid → velocity set,
+   +1 stroke, swing sound. Invalid → action bar message, nothing happens.
 5. Shot velocity: `speed = club.maxSpeed × power × lieModifier`, direction from yaw and the club
    launch angle. Putter shots are pure horizontal.
 
@@ -96,10 +99,11 @@ then play them alone or together with clubs, balls and a golf bag.
   (`Surface at(int x, int y, int z)` + `boolean solid(x,y,z)`). Output: new state + events
   (LANDED, HOLED, HAZARD, AT_REST).
 - Air: gravity 0.05 blocks/tick², drag ×0.99 per tick.
-- Landing: vertical velocity × −restitution; if bounce < 0.08 it stops bouncing and rolls.
+- Landing: vertical velocity × −restitution, horizontal × speed kept on landing; if the bounce is
+  < 0.08 it stops bouncing and rolls.
 - Rolling: horizontal velocity × surface friction per tick. Drops off edges. Hitting a wall
-  reflects that axis with factor 0.5. One-block steps up are walls; slabs/stairs are walls too
-  (no slope simulation in v1).
+  reflects that axis with factor 0.5. Blocks use their real collision height: steps up to 0.15
+  (carpets, tee mats) are rolled over, higher ones are walls (no slope simulation in v1).
 - Sub-steps: moves are split so no step exceeds 0.4 blocks (no tunneling through blocks).
 - **At rest**: speed < 0.005 for 10 consecutive ticks → AT_REST, rest position stored.
 - **Holed**: ball center inside a Cup block's top face within 0.3 blocks of its center at
@@ -156,7 +160,7 @@ charging (also in practice mode).
 
 ### Networking (Fabric payloads, server validates everything)
 
-- C2S: `ShotPayload(float power, float yaw)`, `CycleClubPayload()`,
+- C2S: `CycleClubPayload()`,
   `CreateCoursePayload(String name)`, `CourseActionPayload(UUID course, Action action, int value)`
   where Action ∈ {PAR_UP, PAR_DOWN, DELETE_LAST, ADD_HOLE, START_ROUND} (`value` = hole index).
 - S2C: `OpenCourseScreenPayload(CourseView)`, `RoundStatePayload(RoundView)` (on every change),
@@ -188,7 +192,8 @@ client (split source set)
   Violations are dropped silently except player-facing rule errors (action bar text).
 - Ball entity is removed when its owner leaves; balls of finished holes are removed and the item
   returned (dropped at the player if the inventory is full).
-- Chunk unload while a ball moves: the ball entity keeps itself loaded with a ticket until rest.
+- Chunk unload: max carry (~80 blocks) stays inside the owner's view distance, so no chunk tickets;
+  an unloaded ball is saved with the chunk like any entity.
 - Broken tee/cup during a round: the hole is skipped for everyone with a chat message.
 
 ### Testing

@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "minegolf",
+	"version": "${version}",
+	"name": "MineGolf",
+	"description": "Build golf courses from tee boxes, cups and turf, then play them with clubs, balls and a golf bag.",
+	"authors": [
+		"Colin"
+	],
+	"license": "CC0-1.0",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.colin.minegolf.MineGolf"
+		],
+		"client": [
+			"net.colin.minegolf.client.MineGolfClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
