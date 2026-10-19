@@ -77,6 +77,15 @@ public final class Scorecard {
 		e.finished[hole] = true;
 	}
 
+	/** Removes a hole from scoring (its tee or cup was destroyed during the round). */
+	public void voidHole(int hole) {
+		pars[hole] = 0;
+		for (Entry e : entries.values()) {
+			e.strokes[hole] = 0;
+			e.finished[hole] = true;
+		}
+	}
+
 	public boolean isFinished(UUID player, int hole) {
 		Entry e = entries.get(player);
 		return e != null && e.finished[hole];

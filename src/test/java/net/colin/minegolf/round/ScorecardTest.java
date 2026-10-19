@@ -55,4 +55,14 @@ class ScorecardTest {
         c.removePlayer(b);
         assertTrue(c.holeComplete(0));
     }
+
+    @Test void voidedHoleCountsForNobody() {
+        Scorecard c = new Scorecard(new int[]{3, 4});
+        c.addPlayer(a, "A");
+        c.addStroke(a, 0);
+        c.voidHole(0);
+        assertTrue(c.holeComplete(0));
+        assertEquals(0, c.total(a));
+        assertEquals(0, c.relativeToPar(a));
+    }
 }

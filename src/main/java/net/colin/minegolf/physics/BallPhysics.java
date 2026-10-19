@@ -149,7 +149,8 @@ public final class BallPhysics {
 		return Integer.MIN_VALUE;
 	}
 
-	static double supportTop(SurfaceLookup w, double x, double y, double z) {
+	/** Highest surface the ball could stand on at this spot, or -infinity over a gap. */
+	public static double supportTop(SurfaceLookup w, double x, double y, double z) {
 		int by = supportBlockY(w, x, y, z);
 		return by == Integer.MIN_VALUE ? Double.NEGATIVE_INFINITY : by + w.height(floor(x), by, floor(z));
 	}

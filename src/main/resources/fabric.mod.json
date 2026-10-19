@@ -15,6 +15,9 @@
 		],
 		"client": [
 			"net.colin.minegolf.client.MineGolfClient"
+		],
+		"fabric-gametest": [
+			"net.colin.minegolf.gametest.MineGolfGameTests"
 		]
 	},
 	"depends": {
