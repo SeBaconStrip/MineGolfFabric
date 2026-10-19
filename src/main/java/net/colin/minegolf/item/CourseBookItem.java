@@ -60,11 +60,20 @@ public class CourseBookItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
 		Player player = context.getPlayer();
-		if (player == null || !LINKS.containsKey(player.getUUID())) return InteractionResult.PASS;
+		if (player == null) return InteractionResult.PASS;
+		BlockState clicked = context.getLevel().getBlockState(context.getClickedPos());
+		boolean marker = clicked.is(ModBlocks.TEE_BOX) || clicked.is(ModBlocks.CUP);
+		// The client cannot see link mode, so it consumes every click on a marker block;
+		// otherwise it would also send a use-in-air that cancels the link on the server
 		if (!(player instanceof ServerPlayer serverPlayer) || !(context.getLevel() instanceof ServerLevel level)) {
-			return InteractionResult.SUCCESS;
+			return marker ? InteractionResult.SUCCESS : InteractionResult.PASS;
 		}
 		Link link = LINKS.get(player.getUUID());
+		if (link == null) {
+			if (!marker) return InteractionResult.PASS;
+			openFor(serverPlayer, context.getItemInHand());
+			return InteractionResult.SUCCESS;
+		}
 		if (player.isSecondaryUseActive() || level.getGameTime() - link.startedAt > LINK_TIMEOUT_TICKS) {
 			LINKS.remove(player.getUUID());
 			player.sendOverlayMessage(Component.translatable("minegolf.msg.link_cancelled"));
