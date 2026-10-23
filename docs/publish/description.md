@@ -26,6 +26,30 @@ bunker.
   and distance to the cup, and a scorecard with birdies, bogeys and totals opens at the end.
 - **Practice anywhere** – place a ball on any block and play without keeping score.
 - **Dyeable balls** – combine a golf ball with any dye to tell everyone's ball apart.
+- **20 achievements and 10 statistics** – including the brutal *Sand Wizard* and *Perfect Round*.
+- **Recipe book** – every recipe unlocks as soon as you hold its main ingredient.
+
+## Achievements and statistics
+
+MineGolf has its own advancement tab with 20 achievements, from **Fore!** for your first shot to
+**Perfect Round** for playing every hole of an 18-hole round under par. A few to aim for:
+
+| Achievement | How |
+|---|---|
+| Sand Wizard ★ | Hole out straight from a bunker, at least 20 blocks away |
+| Perfect Round ★ | Every hole of an 18-hole round under par |
+| Hole in One ★ | Sink your tee shot on a hole at least 20 blocks long |
+| Fish Food | Feed the fish 100 golf balls |
+| Snowman | Take 8 strokes on a single hole |
+| Overthinker | Hold your swing too long 10 times |
+
+Course builders choose par freely, so score achievements use a fair par based on the hole's length
+(up to 15 blocks par 2, up to 60 par 3, up to 140 par 4, longer par 5). A par 6 on a short hole will not
+hand out eagles.
+
+Statistics (Statistics → General, also usable as scoreboard objectives like
+`minecraft.custom:minegolf.strokes`): strokes, holes played, rounds finished, holes in one, birdies, eagles,
+penalty strokes, balls in water, wasted swings and longest drive.
 
 ## How to play
 

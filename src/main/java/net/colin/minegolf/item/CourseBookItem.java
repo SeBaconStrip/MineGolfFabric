@@ -5,6 +5,7 @@ import net.colin.minegolf.course.Course;
 import net.colin.minegolf.course.CourseSavedData;
 import net.colin.minegolf.course.Hole;
 import net.colin.minegolf.network.ModPayloads;
+import net.colin.minegolf.stats.GolfAdvancements;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -109,6 +110,7 @@ public class CourseBookItem extends Item {
 		data.setDirty();
 		LINKS.remove(player.getUUID());
 		player.sendSystemMessage(Component.translatable("minegolf.msg.hole_added", course.holes().size(), Hole.DEFAULT_PAR));
+		GolfAdvancements.award(serverPlayer, GolfAdvancements.COURSE_ARCHITECT);
 		sendView(serverPlayer, course);
 		return InteractionResult.SUCCESS;
 	}

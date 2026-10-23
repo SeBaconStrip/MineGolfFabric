@@ -10,3 +10,5 @@
 - Course Book: create courses with up to 18 holes and par 2–6
 - Rounds for several players at once, HUD and scorecard
 - Commands `/minegolf join`, `/minegolf leave`, `/minegolf pickup`
+- 20 achievements in their own tab and 10 statistics
+- All recipes unlock in the recipe book

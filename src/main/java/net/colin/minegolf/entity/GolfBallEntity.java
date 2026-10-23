@@ -6,7 +6,10 @@ import net.colin.minegolf.physics.BallPhysics;
 import net.colin.minegolf.physics.BallState;
 import net.colin.minegolf.physics.Club;
 import net.colin.minegolf.physics.Surface;
+import net.colin.minegolf.round.GolfRules;
 import net.colin.minegolf.round.RoundManager;
+import net.colin.minegolf.stats.GolfAdvancements;
+import net.colin.minegolf.stats.GolfStats;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
@@ -17,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -27,6 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -51,6 +56,11 @@ public class GolfBallEntity extends Entity implements ItemSupplier {
 	private boolean stateSynced;
 	private double restX, restY, restZ;
 	private int roundId = PRACTICE;
+	/** The shot in flight, for drive length and the bunker achievement. Null while resting. */
+	private @Nullable Shot shot;
+
+	private record Shot(Club club, Surface lie, double x, double z) {
+	}
 
 	public GolfBallEntity(EntityType<? extends GolfBallEntity> type, Level level) {
 		super(type, level);
@@ -122,22 +132,70 @@ public class GolfBallEntity extends Entity implements ItemSupplier {
 		switch (event) {
 			case AT_REST -> {
 				markRest();
+				shotCameToRest(lookup);
 				RoundManager.get(level.getServer()).onBallRest(this);
 			}
 			case HOLED -> holed(level);
 			case HAZARD -> {
 				level.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.6F, 1.2F);
+				hitHazard(level);
 				resetToRest();
 				RoundManager.get(level.getServer()).onPenalty(this);
 			}
-			case STUCK -> resetToRest();
+			case STUCK -> {
+				shot = null;
+				resetToRest();
+			}
 			default -> {
 			}
 		}
 	}
 
+	private void shotCameToRest(LevelSurfaceLookup lookup) {
+		Shot done = shot;
+		shot = null;
+		ServerPlayer owner = ownerPlayer();
+		if (done == null || owner == null) return;
+		if (done.club == Club.DRIVER) {
+			int blocks = (int) Math.round(horizontalDistance(done));
+			GolfStats.recordDrive(owner, blocks);
+			if (blocks >= GolfRules.LONG_DRIVE_DISTANCE) GolfAdvancements.award(owner, GolfAdvancements.LONG_DRIVE);
+		}
+		if (BallPhysics.surfaceUnder(state, lookup) == Surface.BUNKER) GolfAdvancements.award(owner, GolfAdvancements.BEACH_DAY);
+	}
+
+	private void hitHazard(ServerLevel level) {
+		shot = null;
+		ServerPlayer owner = ownerPlayer();
+		if (owner == null) return;
+		FluidState fluid = level.getFluidState(BlockPos.containing(getX(), getY(), getZ()));
+		if (fluid.is(FluidTags.LAVA)) {
+			GolfAdvancements.award(owner, GolfAdvancements.HOT_SHOT);
+			return;
+		}
+		// Falling out of the world is a hazard too, but no splash
+		if (!fluid.is(FluidTags.WATER)) return;
+		owner.awardStat(GolfStats.BALLS_IN_WATER);
+		GolfAdvancements.award(owner, GolfAdvancements.SPLASH);
+		if (GolfStats.get(owner, GolfStats.BALLS_IN_WATER) >= GolfAdvancements.FISH_FOOD_BALLS) {
+			GolfAdvancements.award(owner, GolfAdvancements.FISH_FOOD);
+		}
+	}
+
+	private double horizontalDistance(Shot from) {
+		double dx = getX() - from.x;
+		double dz = getZ() - from.z;
+		return Math.sqrt(dx * dx + dz * dz);
+	}
+
 	private void holed(ServerLevel level) {
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.PLAYERS, 1.0F, 1.6F);
+		ServerPlayer shooter = ownerPlayer();
+		if (shot != null && shooter != null && shot.lie == Surface.BUNKER
+				&& horizontalDistance(shot) >= GolfRules.SAND_WIZARD_MIN_DISTANCE) {
+			GolfAdvancements.award(shooter, GolfAdvancements.SAND_WIZARD);
+		}
+		shot = null;
 		if (roundId == PRACTICE) {
 			ServerPlayer owner = ownerPlayer();
 			if (owner != null) owner.sendOverlayMessage(Component.translatable("minegolf.msg.practice_holed"));
@@ -152,6 +210,7 @@ public class GolfBallEntity extends Entity implements ItemSupplier {
 	public void hit(Club club, double power, float yaw) {
 		if (!stateSynced) syncStateFromPosition();
 		Surface lie = BallPhysics.surfaceUnder(state, new LevelSurfaceLookup(level()));
+		shot = new Shot(club, lie, state.x, state.z);
 		BallPhysics.launch(state, club, power, yaw, lie);
 		entityData.set(DATA_RESTING, false);
 		level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 1.6F);

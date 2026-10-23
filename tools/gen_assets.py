@@ -354,6 +354,76 @@ def recipe_unlocks():
         })
 
 
+# name, parent, icon, frame, title, description. Granted from GolfAdvancements in code
+ADVANCEMENTS = [
+    ("fore", "root", f"{NS}:driver", "task", "Fore!", "Hit your first golf shot"),
+    ("course_architect", "root", f"{NS}:course_book", "task", "Course Architect", "Add a hole to a course with the Course Book"),
+    ("fully_equipped", "root", f"{NS}:golf_bag", "task", "Fully Equipped", "Close a golf bag holding all four clubs"),
+    ("long_drive", "fore", f"{NS}:driver", "goal", "Long Drive", "Drive the ball 70 blocks or more"),
+    ("splash", "fore", "minecraft:water_bucket", "task", "Splash!", "Hit your ball into water"),
+    ("fish_food", "splash", "minecraft:cod", "goal", "Fish Food", "Feed the fish 100 golf balls"),
+    ("hot_shot", "fore", "minecraft:lava_bucket", "task", "Hot Shot", "Hit your ball into lava"),
+    ("overthinker", "fore", "minecraft:clock", "task", "Overthinker", "Hold your swing too long 10 times"),
+    ("quitter", "fore", "minecraft:white_banner", "task", "Quitter", "Give up a hole with /minegolf pickup"),
+    ("beach_day", "fore", f"{NS}:bunker_sand", "task", "Beach Day", "Leave your ball in a bunker"),
+    ("sand_wizard", "beach_day", f"{NS}:wedge", "challenge", "Sand Wizard", "Hole out straight from a bunker, at least 20 blocks away"),
+    ("in_the_cup", "fore", f"{NS}:cup", "task", "In the Cup", "Hole out during a round"),
+    ("snowman", "in_the_cup", "minecraft:snowball", "task", "Snowman", "Take 8 strokes on a single hole"),
+    ("birdie", "in_the_cup", "minecraft:feather", "task", "Birdie", "Finish a hole one under par"),
+    ("eagle", "birdie", "minecraft:elytra", "challenge", "Eagle", "Finish a hole two under par"),
+    ("hole_in_one", "in_the_cup", f"{NS}:golf_ball", "challenge", "Hole in One", "Sink your tee shot on a hole at least 20 blocks long"),
+    ("full_18", "in_the_cup", f"{NS}:flag", "challenge", "Full 18", "Finish an 18-hole round"),
+    ("under_par", "birdie", "minecraft:gold_ingot", "challenge", "Under Par", "Finish a round of 9 or more holes under par"),
+    ("perfect_round", "under_par", "minecraft:nether_star", "challenge", "Perfect Round", "Play every hole of an 18-hole round under par"),
+]
+XP = {"challenge": 100, "perfect_round": 500}
+
+
+def advancements():
+    def display(name, icon, frame, root=False):
+        d = {
+            "icon": {"id": icon},
+            "title": {"translate": f"advancements.{NS}.{name}.title"},
+            "description": {"translate": f"advancements.{NS}.{name}.description"},
+            "frame": frame,
+            "show_toast": not root,
+            "announce_to_chat": not root,
+        }
+        if root:
+            d["background"] = f"{NS}:block/fairway_top"
+        return d
+
+    held = {"golf_ball": f"{NS}:golf_ball", "club": f"#{NS}:clubs", "bag": f"{NS}:golf_bag", "book": f"{NS}:course_book"}
+    write_json(f"{DATA}/advancement/golf/root.json", {
+        "display": display("root", f"{NS}:flag", "task", root=True),
+        "criteria": {k: {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": v}]}}
+                     for k, v in held.items()},
+        "requirements": [list(held)],
+    })
+    for name, parent, icon, frame, _, _ in ADVANCEMENTS:
+        adv = {
+            "parent": f"{NS}:golf/{parent}",
+            "display": display(name, icon, frame),
+            "criteria": {"done": {"trigger": "minecraft:impossible"}},
+            "requirements": [["done"]],
+        }
+        xp = XP.get(name, XP["challenge"] if frame == "challenge" else 0)
+        if xp:
+            adv["rewards"] = {"experience": xp}
+        write_json(f"{DATA}/advancement/golf/{name}.json", adv)
+
+    lang_path = f"{ASSETS}/lang/en_us.json"
+    with open(lang_path, encoding="utf-8") as f:
+        lang = json.load(f)
+    lang = {k: v for k, v in lang.items() if not k.startswith(f"advancements.{NS}.")}
+    lang[f"advancements.{NS}.root.title"] = "MineGolf"
+    lang[f"advancements.{NS}.root.description"] = "Grab a club and hit the links"
+    for name, _, _, _, title, desc in ADVANCEMENTS:
+        lang[f"advancements.{NS}.{name}.title"] = title
+        lang[f"advancements.{NS}.{name}.description"] = desc
+    write_json(lang_path, lang)
+
+
 def recipes():
     shapeless("golf_ball", ["minecraft:bone_meal", "minecraft:slime_ball", "minecraft:bone_meal"], "golf_ball", 2)
     write_json(f"{DATA}/recipe/golf_ball_dyed.json", {
@@ -382,4 +452,5 @@ if __name__ == "__main__":
     tags()
     recipes()
     recipe_unlocks()
+    advancements()
     print("generated")

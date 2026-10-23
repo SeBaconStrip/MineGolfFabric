@@ -1,0 +1,27 @@
+{
+  "parent": "minegolf:golf/fore",
+  "display": {
+    "icon": {
+      "id": "minegolf:driver"
+    },
+    "title": {
+      "translate": "advancements.minegolf.long_drive.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.long_drive.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

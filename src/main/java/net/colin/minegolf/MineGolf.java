@@ -9,6 +9,7 @@ import net.colin.minegolf.item.ModItems;
 import net.colin.minegolf.network.ModPayloads;
 import net.colin.minegolf.network.ServerNetworking;
 import net.colin.minegolf.round.RoundManager;
+import net.colin.minegolf.stats.GolfStats;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -23,6 +24,7 @@ public class MineGolf implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Initializing MineGolf");
+		GolfStats.register();
 		ModComponents.register();
 		ModBlocks.register();
 		ModItems.register();

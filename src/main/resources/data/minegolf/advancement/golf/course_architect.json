@@ -1,0 +1,27 @@
+{
+  "parent": "minegolf:golf/root",
+  "display": {
+    "icon": {
+      "id": "minegolf:course_book"
+    },
+    "title": {
+      "translate": "advancements.minegolf.course_architect.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.course_architect.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

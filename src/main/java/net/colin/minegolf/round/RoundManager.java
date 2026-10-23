@@ -5,6 +5,8 @@ import net.colin.minegolf.course.Hole;
 import net.colin.minegolf.entity.GolfBallEntity;
 import net.colin.minegolf.entity.LevelSurfaceLookup;
 import net.colin.minegolf.network.ModPayloads;
+import net.colin.minegolf.stats.GolfAdvancements;
+import net.colin.minegolf.stats.GolfStats;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -191,7 +193,10 @@ public final class RoundManager {
 		UUID id = ball.ownerId();
 		if (id == null) return;
 		round.card.addStroke(id, round.currentHole);
-		if (owner != null) owner.sendOverlayMessage(Component.translatable("minegolf.msg.penalty"));
+		if (owner != null) {
+			owner.sendOverlayMessage(Component.translatable("minegolf.msg.penalty"));
+			owner.awardStat(GolfStats.PENALTY_STROKES);
+		}
 		if (round.card.reachedCap(id, round.currentHole)) capOut(round, id);
 		else broadcast(round);
 	}
@@ -206,6 +211,8 @@ public final class RoundManager {
 		int strokes = round.card.strokes(id, round.currentHole);
 		int par = round.hole().par();
 		round.card.finishHole(id, round.currentHole);
+		ServerPlayer player = server.getPlayerList().getPlayer(id);
+		if (player != null) recordHole(player, strokes, par, round.hole().length());
 		announce(round, Component.translatable("minegolf.msg.holed_out", round.card.name(id), strokes,
 				Component.translatable(scoreName(strokes, par))));
 		checkHoleComplete(round);
@@ -222,6 +229,7 @@ public final class RoundManager {
 			return;
 		}
 		round.card.pickup(player.getUUID(), round.currentHole);
+		GolfAdvancements.award(player, GolfAdvancements.QUITTER);
 		removeBall(round, player.getUUID());
 		announce(round, Component.translatable("minegolf.msg.picked_up", player.getName()));
 		checkHoleComplete(round);
@@ -274,11 +282,41 @@ public final class RoundManager {
 					round.card.total(id), formatToPar(round.card.relativeToPar(id))));
 		}
 		rows.sort((a, b) -> Integer.compare(a.total(), b.total()));
+		int[] lengths = round.holes.stream().mapToInt(Hole::length).toArray();
+		for (UUID id : round.card.players()) {
+			ServerPlayer player = server.getPlayerList().getPlayer(id);
+			if (player != null) recordRound(player, round.card, lengths);
+		}
 		ModPayloads.RoundEnd end = new ModPayloads.RoundEnd(round.courseName, pars, rows);
 		send(round, end);
 		send(round, ModPayloads.RoundClear.INSTANCE);
 		for (UUID id : round.card.players()) byPlayer.remove(id);
 		rounds.remove(round.id);
+	}
+
+	// ------------------------------------------------------------- stats and achievements
+
+	private static void recordHole(ServerPlayer player, int strokes, int par, int length) {
+		player.awardStat(GolfStats.HOLES_PLAYED);
+		int toPar = strokes - par;
+		if (strokes == 1) player.awardStat(GolfStats.HOLES_IN_ONE);
+		else if (toPar == -1) player.awardStat(GolfStats.BIRDIES);
+		else if (toPar == -2) player.awardStat(GolfStats.EAGLES);
+
+		GolfAdvancements.award(player, GolfAdvancements.IN_THE_CUP);
+		int fairToPar = strokes - GolfRules.effectivePar(par, length);
+		if (fairToPar <= -1) GolfAdvancements.award(player, GolfAdvancements.BIRDIE);
+		if (fairToPar <= -2) GolfAdvancements.award(player, GolfAdvancements.EAGLE);
+		if (GolfRules.isHoleInOne(strokes, length)) GolfAdvancements.award(player, GolfAdvancements.HOLE_IN_ONE);
+		if (strokes == GolfRules.SNOWMAN) GolfAdvancements.award(player, GolfAdvancements.SNOWMAN);
+	}
+
+	private static void recordRound(ServerPlayer player, Scorecard card, int[] lengths) {
+		UUID id = player.getUUID();
+		player.awardStat(GolfStats.ROUNDS_FINISHED);
+		if (GolfRules.isFullEighteen(card, id)) GolfAdvancements.award(player, GolfAdvancements.FULL_18);
+		if (GolfRules.isUnderParRound(card, id, lengths)) GolfAdvancements.award(player, GolfAdvancements.UNDER_PAR);
+		if (GolfRules.isPerfectRound(card, id, lengths)) GolfAdvancements.award(player, GolfAdvancements.PERFECT_ROUND);
 	}
 
 	// ------------------------------------------------------------- helpers

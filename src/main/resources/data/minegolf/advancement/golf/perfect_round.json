@@ -1,0 +1,30 @@
+{
+  "parent": "minegolf:golf/under_par",
+  "display": {
+    "icon": {
+      "id": "minecraft:nether_star"
+    },
+    "title": {
+      "translate": "advancements.minegolf.perfect_round.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.perfect_round.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "experience": 500
+  }
+}

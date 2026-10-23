@@ -15,11 +15,13 @@ public final class Scorecard {
 		final String name;
 		final int[] strokes;
 		final boolean[] finished;
+		final boolean[] holed;
 
 		Entry(String name, int holes) {
 			this.name = name;
 			this.strokes = new int[holes];
 			this.finished = new boolean[holes];
+			this.holed = new boolean[holes];
 		}
 	}
 
@@ -64,9 +66,12 @@ public final class Scorecard {
 		return entries.get(player).strokes[hole];
 	}
 
+	/** The ball dropped into the cup. */
 	public void finishHole(UUID player, int hole) {
 		Entry e = entries.get(player);
-		if (e != null) e.finished[hole] = true;
+		if (e == null || e.finished[hole]) return;
+		e.finished[hole] = true;
+		e.holed[hole] = true;
 	}
 
 	/** Gives up the hole and scores the double-par cap. */
@@ -83,12 +88,19 @@ public final class Scorecard {
 		for (Entry e : entries.values()) {
 			e.strokes[hole] = 0;
 			e.finished[hole] = true;
+			e.holed[hole] = false;
 		}
 	}
 
 	public boolean isFinished(UUID player, int hole) {
 		Entry e = entries.get(player);
 		return e != null && e.finished[hole];
+	}
+
+	/** Finished by dropping the ball, not by picking up or a voided hole. */
+	public boolean holedOut(UUID player, int hole) {
+		Entry e = entries.get(player);
+		return e != null && e.holed[hole];
 	}
 
 	public boolean reachedCap(UUID player, int hole) {

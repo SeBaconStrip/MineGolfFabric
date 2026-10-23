@@ -1,0 +1,30 @@
+{
+  "parent": "minegolf:golf/beach_day",
+  "display": {
+    "icon": {
+      "id": "minegolf:wedge"
+    },
+    "title": {
+      "translate": "advancements.minegolf.sand_wizard.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.sand_wizard.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  }
+}

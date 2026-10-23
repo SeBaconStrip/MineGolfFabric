@@ -1,0 +1,67 @@
+{
+  "display": {
+    "icon": {
+      "id": "minegolf:flag"
+    },
+    "title": {
+      "translate": "advancements.minegolf.root.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "background": "minegolf:block/fairway_top"
+  },
+  "criteria": {
+    "golf_ball": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minegolf:golf_ball"
+          }
+        ]
+      }
+    },
+    "club": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minegolf:clubs"
+          }
+        ]
+      }
+    },
+    "bag": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minegolf:golf_bag"
+          }
+        ]
+      }
+    },
+    "book": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minegolf:course_book"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "golf_ball",
+      "club",
+      "bag",
+      "book"
+    ]
+  ]
+}

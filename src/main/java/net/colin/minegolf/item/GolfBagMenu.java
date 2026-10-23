@@ -1,7 +1,10 @@
 package net.colin.minegolf.item;
 
 import net.minecraft.core.NonNullList;
+import net.colin.minegolf.physics.Club;
+import net.colin.minegolf.stats.GolfAdvancements;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -86,6 +90,17 @@ public class GolfBagMenu extends AbstractContainerMenu {
 		NonNullList<ItemStack> list = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 		contents.copyInto(list);
 		return list;
+	}
+
+	@Override
+	public void removed(Player player) {
+		super.removed(player);
+		if (!(player instanceof ServerPlayer serverPlayer)) return;
+		EnumSet<Club> clubs = EnumSet.noneOf(Club.class);
+		for (int i = 0; i < BALL_SLOT; i++) {
+			if (bag.getItem(i).getItem() instanceof ClubItem club) clubs.add(club.club());
+		}
+		if (clubs.size() == Club.values().length) GolfAdvancements.award(serverPlayer, GolfAdvancements.FULLY_EQUIPPED);
 	}
 
 	@Override

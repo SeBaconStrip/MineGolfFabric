@@ -3,6 +3,8 @@ package net.colin.minegolf.item;
 import net.colin.minegolf.entity.GolfBallEntity;
 import net.colin.minegolf.physics.Club;
 import net.colin.minegolf.round.RoundManager;
+import net.colin.minegolf.stats.GolfAdvancements;
+import net.colin.minegolf.stats.GolfStats;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -75,11 +77,17 @@ public class ClubItem extends Item {
 		if (ball == null) return false;
 		if (power <= 0) {
 			player.sendOverlayMessage(Component.translatable("minegolf.msg.overcharged"));
+			player.awardStat(GolfStats.WASTED_SWINGS);
+			if (GolfStats.get(player, GolfStats.WASTED_SWINGS) >= GolfAdvancements.OVERTHINKER_SWINGS) {
+				GolfAdvancements.award(player, GolfAdvancements.OVERTHINKER);
+			}
 			return false;
 		}
 		RoundManager rounds = RoundManager.get(player.level().getServer());
 		if (!rounds.canHit(player, ball) || (club == Club.DRIVER && !ball.isOnTee())) return false;
 		ball.hit(club, power, player.getYRot());
+		player.awardStat(GolfStats.STROKES);
+		GolfAdvancements.award(player, GolfAdvancements.FORE);
 		rounds.onStroke(player, ball);
 		return true;
 	}

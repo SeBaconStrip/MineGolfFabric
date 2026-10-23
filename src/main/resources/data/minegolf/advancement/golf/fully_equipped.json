@@ -1,0 +1,27 @@
+{
+  "parent": "minegolf:golf/root",
+  "display": {
+    "icon": {
+      "id": "minegolf:golf_bag"
+    },
+    "title": {
+      "translate": "advancements.minegolf.fully_equipped.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.fully_equipped.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

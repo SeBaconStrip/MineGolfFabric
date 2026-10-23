@@ -1,0 +1,30 @@
+{
+  "parent": "minegolf:golf/in_the_cup",
+  "display": {
+    "icon": {
+      "id": "minegolf:golf_ball"
+    },
+    "title": {
+      "translate": "advancements.minegolf.hole_in_one.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.hole_in_one.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  }
+}

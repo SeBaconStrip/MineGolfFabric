@@ -1,0 +1,27 @@
+{
+  "parent": "minegolf:golf/root",
+  "display": {
+    "icon": {
+      "id": "minegolf:driver"
+    },
+    "title": {
+      "translate": "advancements.minegolf.fore.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.fore.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

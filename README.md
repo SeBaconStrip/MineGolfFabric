@@ -28,6 +28,10 @@ Plan: [docs/superpowers/plans/2026-10-19-minegolf.md](docs/superpowers/plans/202
 5. On each hole: right-click the tee box with a golf ball, then swing. Everyone plays at the same time; the
    next hole starts when all players have holed out. Scores show in the top-left; a scorecard opens at the end.
 
+Achievements: own tab with 20 advancements, granted from `stats/GolfAdvancements` (tree in
+`tools/gen_assets.py`). Score achievements use a fair par from the hole length (`round/GolfRules`).
+Statistics: `stats/GolfStats`, shown under Statistics → General.
+
 Commands (no OP needed): `/minegolf join <round>`, `/minegolf leave`, `/minegolf pickup` (give up the hole,
 scores double par). Reaching double par ends the hole automatically.
 
@@ -51,4 +55,6 @@ Manual checklist (`runClient`):
 - [ ] Course Book: create, add 2 holes, change par, start round, HUD shows hole/par/strokes/distance
 - [ ] Hole out on both holes → scorecard screen
 - [ ] Golf bag: store clubs, `R` cycles the club in hand
+- [ ] Achievements tab appears after picking up a club; Fore! on the first shot, Splash! in water
+- [ ] Statistics → General lists the golf stats
 - [ ] Second player (`runClient` again, other username) joins via `[Join]`

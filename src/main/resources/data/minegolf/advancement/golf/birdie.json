@@ -1,0 +1,27 @@
+{
+  "parent": "minegolf:golf/in_the_cup",
+  "display": {
+    "icon": {
+      "id": "minecraft:feather"
+    },
+    "title": {
+      "translate": "advancements.minegolf.birdie.title"
+    },
+    "description": {
+      "translate": "advancements.minegolf.birdie.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}
