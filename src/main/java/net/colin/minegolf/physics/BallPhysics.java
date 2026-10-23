@@ -10,6 +10,10 @@ public final class BallPhysics {
 	/** Height the ball rolls over without stopping (carpets, tee mats). */
 	public static final double STEP = 0.15;
 	public static final double MAX_SUBSTEP = 0.4;
+	/** A rolling ball climbs a step up to one block high if it is fast enough, like rolling up a short slope. */
+	public static final double MAX_CLIMB = 1.0;
+	/** Extra energy lost on a climb on top of gravity, for the friction of the slope. */
+	public static final double CLIMB_COST = 1.4;
 	public static final double REST_SPEED = 0.005;
 	public static final int REST_TICKS = 10;
 	public static final int STUCK_TICKS = 600;
@@ -88,6 +92,11 @@ public final class BallPhysics {
 		double nx = xAxis ? s.x + d : s.x;
 		double nz = xAxis ? s.z : s.z + d;
 		double top = supportTop(w, nx, s.y, nz);
+		if (top > s.y + STEP && s.onGround && climb(s, w, nx, nz)) {
+			s.x = nx;
+			s.z = nz;
+			return;
+		}
 		if (top > s.y + STEP) {
 			if (xAxis) s.vx = -s.vx * WALL_KEEP;
 			else s.vz = -s.vz * WALL_KEEP;
@@ -96,6 +105,24 @@ public final class BallPhysics {
 		s.x = nx;
 		s.z = nz;
 		if (s.onGround && top > s.y) s.y = top;
+	}
+
+	/** Rolls the ball up a free-standing step of at most one block if its speed pays for the height. */
+	private static boolean climb(BallState s, SurfaceLookup w, double nx, double nz) {
+		int bx = floor(nx), bz = floor(nz);
+		int by = floor(s.y + STEP);
+		double h = w.height(bx, by, bz);
+		double top = by + h;
+		double rise = top - s.y;
+		if (rise > MAX_CLIMB + 1e-6 || w.height(bx, by + 1, bz) > 0) return false;
+		double speed2 = s.vx * s.vx + s.vz * s.vz;
+		double cost = 2 * GRAVITY * rise * CLIMB_COST;
+		if (speed2 <= cost) return false;
+		double keep = Math.sqrt((speed2 - cost) / speed2);
+		s.vx *= keep;
+		s.vz *= keep;
+		s.y = top;
+		return true;
 	}
 
 	/** Returns true when the ball touched down this substep. */

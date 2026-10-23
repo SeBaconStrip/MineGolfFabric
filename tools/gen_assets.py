@@ -314,6 +314,9 @@ def tags():
     write_json(f"{surf}/ice.json", {"values": ["#minecraft:ice"]})
     write_json(f"{RES}/data/minecraft/tags/block/mineable/shovel.json", {
         "replace": False, "values": [f"{NS}:{b}" for b in TURF + ["cup", "bunker_sand"]]})
+    # 26.3 decides from this tag whether a block counts as ground for heightmaps (mobs, rain, placement)
+    write_json(f"{RES}/data/minecraft/tags/block/blocks_motion_no_leaves.json", {
+        "replace": False, "values": [f"{NS}:{b}" for b in TURF + ["cup", "bunker_sand"]]})
     write_json(f"{DATA}/tags/item/clubs.json", {"values": [f"{NS}:{c}" for c in ("driver", "iron", "wedge", "putter")]})
 
 

@@ -12,3 +12,5 @@
 - Commands `/minegolf join`, `/minegolf leave`, `/minegolf pickup`
 - 20 achievements in their own tab and 10 statistics
 - All recipes unlock in the recipe book
+- A rolling ball climbs a one-block step if it is fast enough, so courses can follow hilly terrain
+- Turf blocks count as solid ground for heightmaps (mob spawning, rain, structure placement)

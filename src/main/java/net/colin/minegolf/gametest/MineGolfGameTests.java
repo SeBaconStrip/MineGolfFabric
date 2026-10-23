@@ -179,4 +179,13 @@ public class MineGolfGameTests {
 			helper.succeed();
 		});
 	}
+
+	@GameTest
+	public void turfCountsAsGroundForHeightmaps(GameTestHelper helper) {
+		for (Block block : List.of(ModBlocks.FAIRWAY, ModBlocks.ROUGH, ModBlocks.GREEN, ModBlocks.BUNKER_SAND, ModBlocks.CUP)) {
+			helper.assertTrue(block.defaultBlockState().is(net.minecraft.tags.BlockTags.BLOCKS_MOTION_IN_HEIGHTMAP_NO_LEAVES),
+					block + " should count as ground");
+		}
+		helper.succeed();
+	}
 }

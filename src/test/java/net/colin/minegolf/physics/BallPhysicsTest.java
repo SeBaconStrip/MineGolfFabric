@@ -109,6 +109,43 @@ class BallPhysicsTest {
         assertEquals(0.0625, s.y, 1e-6);
     }
 
+    /** Fairway with a one-block terrace from z=5 on. */
+    static SurfaceLookup terrace() {
+        return new SurfaceLookup() {
+            public double height(int x, int y, int z) { return y < 0 || (y == 0 && z >= 5) ? 1.0 : 0.0; }
+            public Surface surface(int x, int y, int z) { return Surface.FAIRWAY; }
+            public boolean hazard(int x, int y, int z) { return false; }
+            public boolean isCup(int x, int y, int z) { return false; }
+            public int minY() { return -64; }
+        };
+    }
+
+    @Test void fastBallRollsUpOneBlockStep() {
+        BallState s = ballAt(0.5, 0.5);
+        s.vz = 0.8; s.onGround = true;
+        runUntilDone(s, terrace());
+        assertEquals(1.0, s.y, 1e-6, "ball should be on the upper terrace");
+        assertTrue(s.z > 5.5);
+    }
+
+    @Test void slowBallRollsBackFromStep() {
+        BallState s = ballAt(0.5, 0.5);
+        s.vz = 0.25; s.onGround = true;
+        runUntilDone(s, terrace());
+        assertEquals(0.0, s.y, 1e-6);
+        assertTrue(s.z < 5);
+    }
+
+    @Test void climbingCostsSpeed() {
+        BallState flatBall = ballAt(0.5, 0.5);
+        flatBall.vz = 0.8; flatBall.onGround = true;
+        runUntilDone(flatBall, flat(Surface.FAIRWAY, 9999, 9999, 9999));
+        BallState uphill = ballAt(0.5, 0.5);
+        uphill.vz = 0.8; uphill.onGround = true;
+        runUntilDone(uphill, terrace());
+        assertTrue(uphill.z < flatBall.z - 1, "uphill roll should be shorter");
+    }
+
     @Test void powerRampsHoldsThenDrops() {
         assertEquals(0, Club.powerForTicks(0), 1e-9);
         assertEquals(0.5, Club.powerForTicks(15), 1e-9);

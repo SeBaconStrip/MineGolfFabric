@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minegolf:fairway",
+    "minegolf:rough",
+    "minegolf:green",
+    "minegolf:cup",
+    "minegolf:bunker_sand"
+  ]
+}
