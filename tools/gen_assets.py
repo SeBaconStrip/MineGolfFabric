@@ -329,6 +329,31 @@ def shapeless(name, ingredients, result, count=1, category="misc"):
         "result": {"id": f"{NS}:{result}", "count": count}})
 
 
+# Recipe -> item whose pickup unlocks it in the recipe book
+UNLOCKED_BY = {
+    "golf_ball": "minecraft:slime_ball", "golf_ball_dyed": f"{NS}:golf_ball",
+    "driver": "minecraft:stick", "iron": "minecraft:stick", "wedge": "minecraft:stick", "putter": "minecraft:stick",
+    "golf_bag": "minecraft:leather", "course_book": "minecraft:book",
+    "tee_box": "minecraft:green_carpet", "flag": "minecraft:red_wool",
+    "fairway": "minecraft:grass_block", "rough": "minecraft:grass_block", "green": f"{NS}:fairway",
+    "bunker_sand": "minecraft:sand", "cup": f"{NS}:green",
+}
+
+
+def recipe_unlocks():
+    for name, item in UNLOCKED_BY.items():
+        recipe = f"{NS}:{name}"
+        write_json(f"{DATA}/advancement/recipes/{name}.json", {
+            "parent": "minecraft:recipes/root",
+            "criteria": {
+                "has_item": {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": item}]}},
+                "has_the_recipe": {"trigger": "minecraft:recipe_unlocked", "conditions": {"recipes": recipe}},
+            },
+            "requirements": [["has_the_recipe", "has_item"]],
+            "rewards": {"recipes": [recipe]},
+        })
+
+
 def recipes():
     shapeless("golf_ball", ["minecraft:bone_meal", "minecraft:slime_ball", "minecraft:bone_meal"], "golf_ball", 2)
     write_json(f"{DATA}/recipe/golf_ball_dyed.json", {
@@ -356,4 +381,5 @@ if __name__ == "__main__":
     loot_tables()
     tags()
     recipes()
+    recipe_unlocks()
     print("generated")

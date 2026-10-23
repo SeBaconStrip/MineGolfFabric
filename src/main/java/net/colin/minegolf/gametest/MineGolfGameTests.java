@@ -8,16 +8,23 @@ import net.colin.minegolf.entity.GolfBallEntity;
 import net.colin.minegolf.entity.ModEntities;
 import net.colin.minegolf.physics.Club;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /** Runs with {@code ./gradlew runGametest}: real blocks and the real ball entity, no client. */
@@ -86,6 +93,23 @@ public class MineGolfGameTests {
 		Course loaded = Course.CODEC.parse(NbtOps.INSTANCE, saved.getOrThrow()).getOrThrow();
 		helper.assertValueEqual(loaded.name(), "Test Links", "name");
 		helper.assertValueEqual(loaded.holes(), List.of(hole), "holes");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void everyRecipeUnlocksInRecipeBook(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		Set<ResourceKey<Recipe<?>>> rewarded = new HashSet<>();
+		for (AdvancementHolder advancement : server.getAdvancements().getAllAdvancements()) {
+			rewarded.addAll(advancement.value().rewards().recipes());
+		}
+		int count = 0;
+		for (RecipeHolder<?> recipe : server.getRecipeManager().getRecipes()) {
+			if (!recipe.id().identifier().getNamespace().equals("minegolf")) continue;
+			count++;
+			helper.assertTrue(rewarded.contains(recipe.id()), "no recipe book unlock for " + recipe.id().identifier());
+		}
+		helper.assertTrue(count == 15, "expected 15 MineGolf recipes, found " + count);
 		helper.succeed();
 	}
 }
