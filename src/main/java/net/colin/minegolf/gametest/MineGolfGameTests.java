@@ -106,6 +106,30 @@ public class MineGolfGameTests {
 	}
 
 	@GameTest
+	public void courseHolesCanBeReorderedRemovedAndReplaced(GameTestHelper helper) {
+		Hole a = new Hole(Level.OVERWORLD, new BlockPos(0, 64, 0), new BlockPos(20, 64, 0), 2);
+		Hole b = new Hole(Level.OVERWORLD, new BlockPos(0, 64, 10), new BlockPos(30, 64, 10), 3);
+		Hole c = new Hole(Level.OVERWORLD, new BlockPos(0, 64, 20), new BlockPos(40, 64, 20), 4);
+		Course course = new Course(UUID.randomUUID(), "Edit", UUID.randomUUID(), List.of(a, b, c));
+
+		course.moveHole(2, -1);
+		helper.assertValueEqual(course.holes(), List.of(a, c, b), "after moving hole 3 up");
+		course.moveHole(0, -1);
+		course.moveHole(2, 1);
+		helper.assertValueEqual(course.holes(), List.of(a, c, b), "moves past the ends do nothing");
+
+		course.removeHole(1);
+		helper.assertValueEqual(course.holes(), List.of(a, b), "after removing the middle hole");
+
+		Hole relinked = new Hole(Level.OVERWORLD, new BlockPos(5, 64, 5), new BlockPos(50, 64, 5), a.par());
+		course.setHole(0, relinked);
+		helper.assertValueEqual(course.holes(), List.of(relinked, b), "after relinking hole 1");
+		helper.assertTrue(course.uses(new BlockPos(5, 64, 5), -1), "tee belongs to the course");
+		helper.assertTrue(!course.uses(new BlockPos(5, 64, 5), 0), "a hole being relinked may reuse its own blocks");
+		helper.succeed();
+	}
+
+	@GameTest
 	public void everyRecipeUnlocksInRecipeBook(GameTestHelper helper) {
 		MinecraftServer server = helper.getLevel().getServer();
 		Set<ResourceKey<Recipe<?>>> rewarded = new HashSet<>();

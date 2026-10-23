@@ -53,10 +53,11 @@ public final class Course {
 		return holes.size() >= MAX_HOLES;
 	}
 
-	/** True if the block is already the tee or cup of one of the holes. */
-	public boolean uses(BlockPos pos) {
-		for (Hole h : holes) {
-			if (h.tee().equals(pos) || h.cup().equals(pos)) return true;
+	/** True if the block is already the tee or cup of one of the holes, not counting the hole at ignore. */
+	public boolean uses(BlockPos pos, int ignore) {
+		for (int i = 0; i < holes.size(); i++) {
+			Hole h = holes.get(i);
+			if (i != ignore && (h.tee().equals(pos) || h.cup().equals(pos))) return true;
 		}
 		return false;
 	}
@@ -71,5 +72,22 @@ public final class Course {
 
 	public void removeLastHole() {
 		if (!holes.isEmpty()) holes.removeLast();
+	}
+
+	/** Swaps the hole with its neighbour delta places away; does nothing past either end. */
+	public void moveHole(int index, int delta) {
+		int other = index + delta;
+		if (index >= 0 && index < holes.size() && other >= 0 && other < holes.size()) {
+			holes.set(index, holes.set(other, holes.get(index)));
+		}
+	}
+
+	public void removeHole(int index) {
+		if (index >= 0 && index < holes.size()) holes.remove(index);
+	}
+
+	/** Puts a relinked hole in place of the old one at the same position in the order. */
+	public void setHole(int index, Hole hole) {
+		if (index >= 0 && index < holes.size()) holes.set(index, hole);
 	}
 }

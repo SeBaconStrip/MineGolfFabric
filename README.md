@@ -23,7 +23,8 @@ Plan: [docs/superpowers/plans/2026-10-19-minegolf.md](docs/superpowers/plans/202
    but makes it real golf: green around the cup, fairway between, rough and bunkers around.
 2. Right-click a blank **Course Book**, name the course.
 3. Right-click the book again → **Add hole** → right-click the tee box, then the cup. Repeat for more holes
-   (up to 18), adjust par with `-` / `+`.
+   (up to 18), adjust par with `-` / `+`. Each hole also has ▲ ▼ to reorder, ✕ to delete (click twice) and
+   ⟳ to relink: after a tee box or cup was broken and placed again, ⟳ then click the tee and the cup.
 4. **Start round**. Players within 32 blocks get a clickable `[Join]` in chat (`/minegolf join <id>`).
 5. On each hole: right-click the tee box with a golf ball, then swing. Everyone plays at the same time; the
    next hole starts when all players have holed out. Scores show in the top-left; a scorecard opens at the end.

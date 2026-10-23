@@ -39,7 +39,8 @@ public class CourseBookItem extends Item {
 	/** Player → pending link. Server thread only. */
 	private static final Map<UUID, Link> LINKS = new HashMap<>();
 
-	private record Link(UUID course, @Nullable BlockPos tee, long startedAt) {
+	/** A tee-then-cup link in progress; replace is the hole being relinked, or -1 for a new hole. */
+	private record Link(UUID course, @Nullable BlockPos tee, long startedAt, int replace) {
 	}
 
 	public CourseBookItem(Item.Properties properties) {
@@ -89,7 +90,7 @@ public class CourseBookItem extends Item {
 		}
 		BlockPos pos = context.getClickedPos();
 		BlockState state = level.getBlockState(pos);
-		if (course.uses(pos)) {
+		if (course.uses(pos, link.replace)) {
 			player.sendOverlayMessage(Component.translatable("minegolf.msg.block_in_use"));
 			return InteractionResult.FAIL;
 		}
@@ -98,7 +99,7 @@ public class CourseBookItem extends Item {
 				player.sendOverlayMessage(Component.translatable("minegolf.msg.click_tee"));
 				return InteractionResult.FAIL;
 			}
-			LINKS.put(player.getUUID(), new Link(link.course, pos.immutable(), level.getGameTime()));
+			LINKS.put(player.getUUID(), new Link(link.course, pos.immutable(), level.getGameTime(), link.replace));
 			player.sendOverlayMessage(Component.translatable("minegolf.msg.click_cup"));
 			return InteractionResult.SUCCESS;
 		}
@@ -106,10 +107,20 @@ public class CourseBookItem extends Item {
 			player.sendOverlayMessage(Component.translatable("minegolf.msg.click_cup"));
 			return InteractionResult.FAIL;
 		}
-		course.addHole(new Hole(level.dimension(), link.tee, pos.immutable(), Hole.DEFAULT_PAR));
-		data.setDirty();
 		LINKS.remove(player.getUUID());
-		player.sendSystemMessage(Component.translatable("minegolf.msg.hole_added", course.holes().size(), Hole.DEFAULT_PAR));
+		if (link.replace >= 0) {
+			if (link.replace >= course.holes().size()) {
+				player.sendOverlayMessage(Component.translatable("minegolf.msg.link_cancelled"));
+				return InteractionResult.FAIL;
+			}
+			int par = course.holes().get(link.replace).par();
+			course.setHole(link.replace, new Hole(level.dimension(), link.tee, pos.immutable(), par));
+			player.sendSystemMessage(Component.translatable("minegolf.msg.hole_relinked", link.replace + 1));
+		} else {
+			course.addHole(new Hole(level.dimension(), link.tee, pos.immutable(), Hole.DEFAULT_PAR));
+			player.sendSystemMessage(Component.translatable("minegolf.msg.hole_added", course.holes().size(), Hole.DEFAULT_PAR));
+		}
+		data.setDirty();
 		GolfAdvancements.award(serverPlayer, GolfAdvancements.COURSE_ARCHITECT);
 		sendView(serverPlayer, course);
 		return InteractionResult.SUCCESS;
@@ -154,9 +165,12 @@ public class CourseBookItem extends Item {
 		return ItemStack.EMPTY;
 	}
 
-	public static void startLink(ServerPlayer player, Course course) {
-		LINKS.put(player.getUUID(), new Link(course.id(), null, player.level().getGameTime()));
-		player.sendOverlayMessage(Component.translatable("minegolf.msg.click_tee"));
+	/** Starts linking a new hole (replace = -1) or relinking the tee and cup of an existing one. */
+	public static void startLink(ServerPlayer player, Course course, int replace) {
+		LINKS.put(player.getUUID(), new Link(course.id(), null, player.level().getGameTime(), replace));
+		player.sendOverlayMessage(replace >= 0
+				? Component.translatable("minegolf.msg.click_tee_relink", replace + 1)
+				: Component.translatable("minegolf.msg.click_tee"));
 	}
 
 	public static void forget(UUID player) {

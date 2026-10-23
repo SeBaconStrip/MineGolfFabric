@@ -56,11 +56,20 @@ public final class ServerNetworking {
 			case ModPayloads.CourseAction.PAR_UP -> course.changePar(action.value(), 1);
 			case ModPayloads.CourseAction.PAR_DOWN -> course.changePar(action.value(), -1);
 			case ModPayloads.CourseAction.DELETE_LAST -> course.removeLastHole();
+			case ModPayloads.CourseAction.MOVE_UP -> course.moveHole(action.value(), -1);
+			case ModPayloads.CourseAction.MOVE_DOWN -> course.moveHole(action.value(), 1);
+			case ModPayloads.CourseAction.DELETE -> course.removeHole(action.value());
 			case ModPayloads.CourseAction.ADD_HOLE -> {
 				if (course.isFull()) {
 					player.sendOverlayMessage(Component.translatable("minegolf.msg.course_full"));
 				} else {
-					CourseBookItem.startLink(player, course);
+					CourseBookItem.startLink(player, course, -1);
+				}
+				return;
+			}
+			case ModPayloads.CourseAction.RELINK -> {
+				if (action.value() >= 0 && action.value() < course.holes().size()) {
+					CourseBookItem.startLink(player, course, action.value());
 				}
 				return;
 			}

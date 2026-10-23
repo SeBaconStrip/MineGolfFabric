@@ -55,6 +55,10 @@ public final class ModPayloads {
 		public static final int DELETE_LAST = 2;
 		public static final int ADD_HOLE = 3;
 		public static final int START_ROUND = 4;
+		public static final int MOVE_UP = 5;
+		public static final int MOVE_DOWN = 6;
+		public static final int DELETE = 7;
+		public static final int RELINK = 8;
 
 		public static final Type<CourseAction> TYPE = payloadType("course_action");
 		public static final StreamCodec<RegistryFriendlyByteBuf, CourseAction> CODEC = CustomPacketPayload.codec(

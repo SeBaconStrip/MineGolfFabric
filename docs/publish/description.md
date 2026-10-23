@@ -20,7 +20,7 @@ bunker.
 - **Golf Bag** – holds your four clubs and 16 balls. Press `R` to swap the club in your hand for the next one
   in the bag.
 - **Course Book** – name a course, click a tee box and a cup for each hole (up to 18), set par from 2 to 6,
-  and start a round.
+  reorder or delete holes, relink a hole after rebuilding its tee or cup, and start a round.
 - **Rounds with friends** – players within 32 blocks get a clickable `[Join]` in chat. Everyone plays their
   own ball at the same time; the next hole starts once all have holed out. The HUD shows hole, par, strokes
   and distance to the cup, and a scorecard with birdies, bogeys and totals opens at the end.
