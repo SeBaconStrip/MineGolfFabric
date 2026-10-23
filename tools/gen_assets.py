@@ -181,6 +181,44 @@ FAIRWAY_RGB = (90, 165, 60)
 ROUGH_RGB = (58, 112, 40)
 
 
+def icon():
+    """32x32 mod icon: green with cup and flag, ball in front, sky behind."""
+    rnd = random.Random(11)
+    img = Image.new("RGBA", (32, 32))
+    for y in range(32):
+        for x in range(32):
+            if y < 17:
+                c = shade((120, 190, 240), (17 - y) * -3 + 20)
+            elif y < 19:
+                c = shade(ROUGH_RGB, rnd.randint(-10, 10))
+            else:
+                c = shade(GREEN_RGB if (x // 4 + y // 4) % 2 else FAIRWAY_RGB, rnd.randint(-5, 5))
+            img.putpixel((x, y), c + (255,))
+    for (x, y) in [(5, 4), (6, 4), (7, 4), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5), (6, 3), (10, 6), (11, 6), (12, 6)]:
+        img.putpixel((x, y), (250, 250, 255, 255))
+    # cup with flag
+    for x in range(20, 26):
+        img.putpixel((x, 22), (30, 30, 30, 255))
+        img.putpixel((x, 23), (20, 20, 20, 255))
+    for y in range(3, 23):
+        img.putpixel((22, y), (240, 240, 240, 255))
+    for y in range(3, 10):
+        for x in range(23, 23 + 8 - abs(y - 6)):
+            img.putpixel((x, y), (210 - (x - 23) * 6, 30, 30, 255))
+    # ball with shadow
+    for y in range(20, 32):
+        for x in range(2, 16):
+            d = ((x - 8.5) ** 2 + (y - 25.5) ** 2) ** 0.5
+            if d < 4.6:
+                light = 255 - int(d * 12)
+                if (x + y) % 3 == 0 and d < 3.5:
+                    light -= 22
+                img.putpixel((x, y), (light, light, light, 255))
+            elif ((x - 10) ** 2 / 30 + (y - 30) ** 2 / 2) < 1 and y > 27:
+                img.putpixel((x, y), shade(img.getpixel((x, y))[:3], -40) + (255,))
+    return img
+
+
 def textures():
     b = f"{ASSETS}/textures/block"
     i = f"{ASSETS}/textures/item"
@@ -203,6 +241,8 @@ def textures():
     save(bag_item(), f"{i}/golf_bag.png")
     save(book_item(), f"{i}/course_book.png")
     save(flag_item(), f"{i}/flag.png")
+    save(icon().resize((128, 128), Image.NEAREST), f"{ASSETS}/icon.png")
+    save(icon().resize((512, 512), Image.NEAREST), "docs/publish/icon-512.png")
 
 
 # ---------------------------------------------------------------- models
