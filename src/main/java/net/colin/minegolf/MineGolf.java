@@ -2,6 +2,7 @@ package net.colin.minegolf;
 
 import net.colin.minegolf.block.ModBlocks;
 import net.colin.minegolf.command.MineGolfCommand;
+import net.colin.minegolf.dev.DemoCourseBuilder;
 import net.colin.minegolf.entity.ModEntities;
 import net.colin.minegolf.item.CourseBookItem;
 import net.colin.minegolf.item.ModComponents;
@@ -26,6 +27,7 @@ public class MineGolf implements ModInitializer {
 		LOGGER.info("Initializing MineGolf");
 		GolfStats.register();
 		ModComponents.register();
+		DemoCourseBuilder.register();
 		ModBlocks.register();
 		ModItems.register();
 		ModEntities.register();
