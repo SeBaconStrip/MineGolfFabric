@@ -115,6 +115,17 @@ public final class RoundManager {
 		byPlayer.put(player.getUUID(), round);
 	}
 
+	/** Ends the round for this player on request, with feedback. Others in the group play on. */
+	public void quit(ServerPlayer player) {
+		Round round = byPlayer.get(player.getUUID());
+		if (round == null) {
+			player.sendSystemMessage(Component.translatable("minegolf.msg.not_in_round"));
+			return;
+		}
+		leave(player);
+		player.sendSystemMessage(Component.translatable("minegolf.msg.you_left", round.courseName));
+	}
+
 	/** Removes the player from their round, if any. */
 	public void leave(ServerPlayer player) {
 		Round round = byPlayer.remove(player.getUUID());

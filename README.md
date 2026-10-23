@@ -33,6 +33,8 @@ Achievements: own tab with 20 advancements, granted from `stats/GolfAdvancements
 `tools/gen_assets.py`). Score achievements use a fair par from the hole length (`round/GolfRules`).
 Statistics: `stats/GolfStats`, shown under Statistics → General.
 
+To stop early, press **Leave round** in the Course Book (or `/minegolf leave`); the others play on.
+
 Commands (no OP needed): `/minegolf join <round>`, `/minegolf leave`, `/minegolf pickup` (give up the hole,
 scores double par). Reaching double par ends the hole automatically.
 

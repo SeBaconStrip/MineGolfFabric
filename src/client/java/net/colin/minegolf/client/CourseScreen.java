@@ -82,7 +82,15 @@ public class CourseScreen extends Screen {
 			onClose();
 		}).bounds(view.canEdit() ? cx + 4 : cx - 50, y, 100, 20).build());
 		start.active = !view.holes().isEmpty();
-		addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose()).bounds(cx - 50, y + 24, 100, 20).build());
+		boolean inRound = ClientRoundState.get() != null;
+		if (inRound) {
+			addRenderableWidget(Button.builder(Component.translatable("minegolf.screen.leave_round"), b -> {
+				send(ModPayloads.CourseAction.LEAVE_ROUND, 0);
+				onClose();
+			}).bounds(cx - 104, y + 24, 100, 20).build());
+		}
+		addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
+				.bounds(inRound ? cx + 4 : cx - 50, y + 24, 100, 20).build());
 	}
 
 	private void small(int x, int y, String label, String tooltip, boolean active, Runnable onPress) {

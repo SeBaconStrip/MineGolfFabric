@@ -24,7 +24,7 @@ public final class MineGolfCommand {
 				.then(Commands.literal("leave")
 						.executes(ctx -> {
 							ServerPlayer player = ctx.getSource().getPlayerOrException();
-							RoundManager.get(ctx.getSource().getServer()).leave(player);
+							RoundManager.get(ctx.getSource().getServer()).quit(player);
 							return 1;
 						}))
 				.then(Commands.literal("pickup")

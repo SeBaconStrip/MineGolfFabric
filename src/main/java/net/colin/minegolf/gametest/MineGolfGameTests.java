@@ -212,4 +212,19 @@ public class MineGolfGameTests {
 		}
 		helper.succeed();
 	}
+
+	@GameTest
+	public void playerCanLeaveRound(GameTestHelper helper) {
+		helper.setBlock(1, 1, 1, ModBlocks.TEE_BOX);
+		helper.setBlock(6, 0, 6, ModBlocks.CUP);
+		Hole hole = new Hole(Level.OVERWORLD, helper.absolutePos(new BlockPos(1, 1, 1)), helper.absolutePos(new BlockPos(6, 0, 6)), 3);
+		Course course = new Course(UUID.randomUUID(), "Leave Test", UUID.randomUUID(), List.of(hole));
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		net.colin.minegolf.round.RoundManager rounds = net.colin.minegolf.round.RoundManager.get(helper.getLevel().getServer());
+		rounds.start(player, course);
+		helper.assertTrue(rounds.roundOf(player) != null, "player should be in the round");
+		rounds.quit(player);
+		helper.assertTrue(rounds.roundOf(player) == null, "player should have left the round");
+		helper.succeed();
+	}
 }

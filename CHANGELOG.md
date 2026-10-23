@@ -12,6 +12,7 @@
 - Commands `/minegolf join`, `/minegolf leave`, `/minegolf pickup`
 - 20 achievements in their own tab and 10 statistics
 - All recipes unlock in the recipe book
+- Leave a round from the Course Book or with `/minegolf leave`
 - Course Book: reorder holes, delete any hole, relink a hole whose tee or cup was rebuilt
 - A rolling ball climbs a one-block step if it is fast enough, so courses can follow hilly terrain
 - Turf blocks count as solid ground for heightmaps (mob spawning, rain, structure placement)

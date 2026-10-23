@@ -43,6 +43,11 @@ public final class ServerNetworking {
 		Course course = data.get(action.course());
 		if (course == null) return;
 
+		if (action.action() == ModPayloads.CourseAction.LEAVE_ROUND) {
+			player.closeContainer();
+			RoundManager.get(player.level().getServer()).quit(player);
+			return;
+		}
 		if (action.action() == ModPayloads.CourseAction.START_ROUND) {
 			player.closeContainer();
 			RoundManager.get(player.level().getServer()).start(player, course);

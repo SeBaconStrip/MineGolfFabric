@@ -62,7 +62,7 @@
   "minegolf.msg.practice_ball": "Practice ball placed. Sneak + use on it to pick it up.",
   "minegolf.msg.practice_hazard": "Hazard! The ball is back where it last lay.",
   "minegolf.msg.practice_holed": "Holed!",
-  "minegolf.msg.round_started": "Round on %s started (%s holes).",
+  "minegolf.msg.round_started": "Round on %s started (%s holes). Leave any time with the Course Book or /minegolf leave.",
   "minegolf.msg.wait_for_others": "You finished this hole. Waiting for the others.",
   "minegolf.msg.wrong_tee": "Hole %s starts at the tee box at %s %s %s.",
   "minegolf.score.albatross": "Albatross",
@@ -145,5 +145,7 @@
   "minegolf.screen.relink": "Relink tee and cup (after moving or rebuilding them)",
   "minegolf.screen.delete": "Delete this hole",
   "minegolf.screen.delete_confirm": "Click again to delete",
-  "minegolf.screen.broken_hint": "Red holes are missing their tee box or cup: rebuild it, then use ⟳ to relink."
+  "minegolf.screen.broken_hint": "Red holes are missing their tee box or cup: rebuild it, then use ⟳ to relink.",
+  "minegolf.msg.you_left": "You left the round on %s.",
+  "minegolf.screen.leave_round": "Leave round"
 }
