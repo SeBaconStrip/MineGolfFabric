@@ -7,12 +7,9 @@ Englisch, weil der Mod Englisch ist.
 
 1. **Im Spiel testen** – Checkliste in der [README](../../README.md#development) einmal durchspielen.
    Fehler zuerst fixen, dann hochladen.
-2. **Lizenz entscheiden** – im Moment `CC0-1.0`: jeder darf den Mod kopieren und neu hochladen, auch ohne
-   dich zu nennen. Alternativen: `MIT` (Nennung Pflicht) oder `All Rights Reserved` (ohne Quellcode).
-   Wechseln heisst: `LICENSE` ersetzen und `"license"` in `src/main/resources/fabric.mod.json` ändern.
-3. **Screenshots machen** – 3–5 Stück mit `F2` (landen in `run/screenshots/`): ein Abschlag mit Zielhilfe
+2. **Screenshots machen** – 3–5 Stück mit `F2` (landen in `run/screenshots/`): ein Abschlag mit Zielhilfe
    und Kraftbalken, ein fertiges Loch mit Grün, Fahne und Bunker, die Scorecard, der Golfbag.
-4. **Jar bauen** – siehe unten.
+3. **Jar bauen** – siehe unten.
 
 ## Jar bauen
 
@@ -35,7 +32,7 @@ Hochladen: `build/libs/minegolf-0.1.0.jar` (nicht die `-sources.jar`).
 | Categories | `Minigame`, `Equipment`, `Game Mechanics` |
 | Client-side | Required |
 | Server-side | Required |
-| License | wie in `fabric.mod.json` (zurzeit `CC0-1.0`) |
+| License | `MIT License` |
 | Source code / Issues | leer lassen, solange das Repo privat ist |
 | Gallery | die Screenshots |
 
@@ -64,7 +61,7 @@ Dann **Submit for review**. Modrinth prüft neue Projekte von Hand, das dauert m
 | Description | `docs/publish/description.md` (Editor auf Markdown stellen) |
 | Avatar | `docs/publish/icon-512.png` |
 | Categories | `Adventure and RPG`, `Miscellaneous` |
-| License | wie bei Modrinth |
+| License | `MIT License` |
 
 Datei hochladen: Release type `Beta`, Game version `26.3`, Modloader `Fabric`, Java `Java 25`,
 Related project `Fabric API` → Required dependency. CurseForge prüft ebenfalls von Hand.
