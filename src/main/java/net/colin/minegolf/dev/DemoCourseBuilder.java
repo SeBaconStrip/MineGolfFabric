@@ -8,12 +8,16 @@ import net.colin.minegolf.course.Hole;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.QuartPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biomes;
@@ -50,8 +54,14 @@ public final class DemoCourseBuilder {
 		if (!FabricLoader.getInstance().isDevelopmentEnvironment()) return;
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, env) -> dispatcher.register(
 				Commands.literal("minegolf_dev").then(Commands.literal("demo").executes(ctx -> {
-					current = new DemoCourseBuilder(ctx.getSource().getServer());
-					current.start();
+					MinecraftServer server = ctx.getSource().getServer();
+					// A second call while building would replace the first builder before it welcomes the player
+					if (current != null && current.server == server && current.stage != Stage.DONE) {
+						ctx.getSource().sendFailure(Component.literal("A demo course is already being built, please wait."));
+						return 0;
+					}
+					current = new DemoCourseBuilder(server);
+					current.chat("Building a demo course: searching for a good spot near spawn...");
 					return 1;
 				}))));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -177,12 +187,25 @@ public final class DemoCourseBuilder {
 
 	// ---------------------------------------------------------------- state
 
-	private enum Stage {LOADING, WELCOME, DONE}
+	/** Each stage runs over several ticks so the game stays responsive and can show progress. */
+	private enum Stage {SEARCH, LOADING, BUILD, WELCOME, DONE}
+
+	/** Milliseconds of site search per tick. */
+	private static final long SEARCH_BUDGET_MS = 30;
+	private static final int SEARCH_RANGE = 640, SEARCH_STEP = 64;
+	/** Spacing of the height samples inside one candidate spot; each sample costs a noise evaluation. */
+	private static final int SAMPLE_STEP = 28;
+
+	private record Candidate(int x, int z, double score) {
+	}
 
 	private final MinecraftServer server;
 	private final ServerLevel level;
 	private final CommandSourceStack source;
-	private Stage stage = Stage.LOADING;
+	private Stage stage = Stage.SEARCH;
+	private final List<int[]> offsets = new ArrayList<>();
+	private final List<Candidate> candidates = new ArrayList<>();
+	private int lastPercent = -1;
 	private List<long[]> forced = List.of();
 	private final List<String> welcome = new ArrayList<>();
 	private final List<String> log = new ArrayList<>();
@@ -194,72 +217,109 @@ public final class DemoCourseBuilder {
 		this.server = server;
 		this.level = server.overworld();
 		this.source = server.createCommandSourceStack().withSuppressedOutput();
-	}
-
-	private void start() {
-		findSite();
-		forced = chunks();
-		for (long[] c : forced) level.setChunkForced((int) c[0], (int) c[1], true);
-		MineGolf.LOGGER.info("DEMO site {},{} - loading {} chunks", ox, oz, forced.size());
+		for (int cx = -SEARCH_RANGE; cx <= SEARCH_RANGE; cx += SEARCH_STEP) {
+			for (int cz = -SEARCH_RANGE; cz <= SEARCH_RANGE; cz += SEARCH_STEP) offsets.add(new int[] {cx, cz});
+		}
 	}
 
 	private void tick() {
-		if (stage == Stage.LOADING) {
-			for (long[] c : forced) {
-				if (!level.getChunkSource().hasChunk((int) c[0], (int) c[1])) return;
+		switch (stage) {
+			case SEARCH -> {
+				long until = System.currentTimeMillis() + SEARCH_BUDGET_MS;
+				while (candidates.size() < offsets.size() && System.currentTimeMillis() < until) {
+					int[] o = offsets.get(candidates.size());
+					candidates.add(score(o[0], o[1]));
+				}
+				progress("Searching for a spot", candidates.size(), offsets.size());
+				if (candidates.size() < offsets.size()) return;
+				pickSite();
+				forced = chunks();
+				for (long[] c : forced) level.setChunkForced((int) c[0], (int) c[1], true);
+				MineGolf.LOGGER.info("DEMO site {},{} - loading {} chunks", ox, oz, forced.size());
+				chat(String.format("Spot found at %d, %d. Loading the terrain (%d chunks)...", ox + W / 2, oz + D / 2, forced.size()));
+				lastPercent = -1;
+				stage = Stage.LOADING;
 			}
-			build();
-			try {
-				renderPreview(server.getWorldPath(LevelResource.ROOT).resolve("minegolf_preview.png"));
-			} catch (IOException e) {
-				MineGolf.LOGGER.error("DEMO preview failed", e);
+			case LOADING -> {
+				int loaded = 0;
+				for (long[] c : forced) {
+					if (level.getChunkSource().hasChunk((int) c[0], (int) c[1])) loaded++;
+				}
+				progress("Loading terrain", loaded, forced.size());
+				if (loaded < forced.size()) return;
+				// Building takes a few seconds in one go; say so a tick earlier so the message gets out first
+				chat("Shaping the land and building 6 holes, the game may pause for a few seconds...");
+				stage = Stage.BUILD;
 			}
-			for (long[] c : forced) level.setChunkForced((int) c[0], (int) c[1], false);
-			MineGolf.LOGGER.info("DEMO BUILD done\n{}", String.join("\n", log));
-			stage = Stage.WELCOME;
-		} else if (stage == Stage.WELCOME && !server.getPlayerList().getPlayers().isEmpty()) {
-			welcome.forEach(this::cmd);
-			stage = Stage.DONE;
+			case BUILD -> {
+				build();
+				try {
+					renderPreview(server.getWorldPath(LevelResource.ROOT).resolve("minegolf_preview.png"));
+				} catch (IOException e) {
+					MineGolf.LOGGER.error("DEMO preview failed", e);
+				}
+				for (long[] c : forced) level.setChunkForced((int) c[0], (int) c[1], false);
+				MineGolf.LOGGER.info("DEMO BUILD done\n{}", String.join("\n", log));
+				stage = Stage.WELCOME;
+			}
+			case WELCOME -> {
+				if (server.getPlayerList().getPlayers().isEmpty()) return;
+				welcome.forEach(this::cmd);
+				stage = Stage.DONE;
+			}
+			case DONE -> {
+			}
 		}
+	}
+
+	/** Chat line to everyone. */
+	private void chat(String text) {
+		server.getPlayerList().broadcastSystemMessage(Component.literal(text).withStyle(ChatFormatting.GRAY), false);
+	}
+
+	/** Progress in the action bar, sent when the percentage changes. */
+	private void progress(String what, int done, int total) {
+		int percent = total == 0 ? 100 : done * 100 / total;
+		if (percent == lastPercent) return;
+		lastPercent = percent;
+		Component bar = Component.literal(what + "... " + percent + "%").withStyle(ChatFormatting.YELLOW);
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) player.sendOverlayMessage(bar);
 	}
 
 	// ---------------------------------------------------------------- site search
 
-	private void findSite() {
+	/** Lower is better: some relief is welcome, cliffs, water and distance from spawn are not. */
+	private Candidate score(int cx, int cz) {
 		ChunkGenerator gen = level.getChunkSource().getGenerator();
 		RandomState rs = level.getChunkSource().randomState();
 		BlockPos spawn = level.getRespawnData().globalPos().pos();
-		record Candidate(int x, int z, double score) {
-		}
-		List<Candidate> list = new ArrayList<>();
-		for (int cx = -640; cx <= 640; cx += 64) {
-			for (int cz = -640; cz <= 640; cz += 64) {
-				int x0 = spawn.getX() + cx - W / 2, z0 = spawn.getZ() + cz - D / 2;
-				double sum = 0, sq = 0;
-				int n = 0, wet = 0;
-				for (int x = x0 + 10; x < x0 + W - 10; x += 14) {
-					for (int z = z0 + 10; z < z0 + D - 10; z += 14) {
-						int top = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, rs);
-						int floor = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, rs);
-						if (floor < top) wet++;
-						sum += top;
-						sq += (double) top * top;
-						n++;
-					}
-				}
-				double mean = sum / n;
-				double std = Math.sqrt(Math.max(0, sq / n - mean * mean));
-				// Some relief is welcome, cliffs and water are not
-				double score = Math.abs(std - 2) * 3 + wet * 2 + (mean < 64 ? 40 : 0) + (mean > 110 ? 40 : 0)
-						+ Math.hypot(cx, cz) / 64.0;
-				list.add(new Candidate(x0, z0, score));
+		int x0 = spawn.getX() + cx - W / 2, z0 = spawn.getZ() + cz - D / 2;
+		double sum = 0, sq = 0;
+		int n = 0, wet = 0;
+		for (int x = x0 + 10; x < x0 + W - 10; x += SAMPLE_STEP) {
+			for (int z = z0 + 10; z < z0 + D - 10; z += SAMPLE_STEP) {
+				int top = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, rs);
+				int floor = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, rs);
+				if (floor < top) wet++;
+				sum += top;
+				sq += (double) top * top;
+				n++;
 			}
 		}
+		double mean = sum / n;
+		double std = Math.sqrt(Math.max(0, sq / n - mean * mean));
+		double score = Math.abs(std - 2) * 3 + wet * 2 + (mean < 64 ? 40 : 0) + (mean > 110 ? 40 : 0)
+				+ Math.hypot(cx, cz) / 64.0;
+		return new Candidate(x0, z0, score);
+	}
+
+	/** Best scored spot in a pleasant biome; the biome comes from the generator, without generating chunks. */
+	private void pickSite() {
+		List<Candidate> list = new ArrayList<>(candidates);
 		list.sort((a, b) -> Double.compare(a.score, b.score));
 		for (Candidate c : list.subList(0, Math.min(15, list.size()))) {
-			BlockPos mid = new BlockPos(c.x + W / 2, 80, c.z + D / 2);
-			level.getChunk(mid);
-			var biome = level.getBiome(mid);
+			int mx = c.x + W / 2, mz = c.z + D / 2;
+			var biome = level.getUncachedNoiseBiome(QuartPos.fromBlock(mx), QuartPos.fromBlock(80), QuartPos.fromBlock(mz));
 			boolean nice = biome.is(Biomes.PLAINS) || biome.is(Biomes.SUNFLOWER_PLAINS) || biome.is(Biomes.MEADOW)
 					|| biome.is(Biomes.FOREST) || biome.is(Biomes.FLOWER_FOREST) || biome.is(Biomes.BIRCH_FOREST)
 					|| biome.is(Biomes.CHERRY_GROVE);
@@ -678,7 +738,7 @@ public final class DemoCourseBuilder {
 		welcome.add(String.format("tp @a %.1f %d %.1f facing %d %d %d", stand[0], t1[1], stand[1],
 				(int) lanes.getFirst().p[1][0], t1[1], (int) lanes.getFirst().p[1][1]));
 		welcome.add("gamemode creative @a");
-		welcome.add("tellraw @a {text:\"Welcome to MineGolf Links! 6 holes, par 22.\",color:\"green\"}");
+		welcome.add("tellraw @a {text:\"Done! Welcome to MineGolf Links! 6 holes, par 22.\",color:\"green\"}");
 		welcome.add("tellraw @a {text:\"Right-click the Course Book and press Start round, then tee off at hole 1.\",color:\"gray\"}");
 	}
 
