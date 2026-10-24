@@ -9,6 +9,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,5 +47,9 @@ public final class CourseSavedData extends SavedData {
 
 	public @Nullable Course get(UUID id) {
 		return courses.get(id);
+	}
+
+	public Collection<Course> all() {
+		return courses.values();
 	}
 }

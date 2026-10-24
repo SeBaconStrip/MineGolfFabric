@@ -24,6 +24,12 @@ bunker.
 - **Rounds with friends** – players within 32 blocks get a clickable `[Join]` in chat. Everyone plays their
   own ball at the same time; the next hole starts once all have holed out. The HUD shows hole, par, strokes
   and distance to the cup, and a scorecard with birdies, bogeys and totals opens at the end.
+- **Range Finder** – look at any block: distance, height difference and a suggested club with power, worked
+  out with the same physics as the ball. Aim at the flag to measure to the cup.
+- **Hole Signs** – place one next to a tee box and it writes hole number, par and length by itself, and keeps
+  them up to date when you change the course.
+- **Out of Bounds** – white stakes form a boundary line. A ball that stops on the other side costs a penalty
+  stroke and is played again from where it was hit. Hold a stake or the Course Book to see the lines.
 - **Practice anywhere** – place a ball on any block and play without keeping score.
 - **Dyeable balls** – combine a golf ball with any dye to tell everyone's ball apart.
 - **20 achievements and 10 statistics** – including the brutal *Sand Wizard* and *Perfect Round*.
@@ -80,6 +86,9 @@ hole for double par).
 | Green ×4 | 4 Fairway + Bone Meal |
 | Bunker Sand ×4 | 4 Sand + Bone Meal |
 | Cup | Green + Iron Ingot |
+| Range Finder | Iron, Glass Pane, Iron above Iron, Redstone, Iron |
+| Hole Sign | Birch Sign + Paper |
+| Out-of-Bounds Stake ×4 | White Dye above 2 Sticks |
 
 All items are also in the **MineGolf** creative tab.
 

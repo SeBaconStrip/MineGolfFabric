@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:birch_sign",
+    "minecraft:paper"
+  ],
+  "result": {
+    "id": "minegolf:hole_sign",
+    "count": 1
+  }
+}

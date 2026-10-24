@@ -4,7 +4,9 @@ Golf for Minecraft 26.3 (Fabric). Build courses from tee boxes, cups and turf, t
 or with friends using clubs, balls and a golf bag.
 
 Design: [docs/superpowers/specs/2026-10-19-minegolf-design.md](docs/superpowers/specs/2026-10-19-minegolf-design.md) ·
-Plan: [docs/superpowers/plans/2026-10-19-minegolf.md](docs/superpowers/plans/2026-10-19-minegolf.md)
+Plan: [docs/superpowers/plans/2026-10-19-minegolf.md](docs/superpowers/plans/2026-10-19-minegolf.md) ·
+Course tools (0.2.0): [spec](docs/superpowers/specs/2026-10-24-course-tools-design.md),
+[plan](docs/superpowers/plans/2026-10-24-course-tools.md)
 
 ## Content
 
@@ -16,6 +18,9 @@ Plan: [docs/superpowers/plans/2026-10-19-minegolf.md](docs/superpowers/plans/202
 | Course Book | Create a course, add holes, set par, start a round. |
 | Tee Box, Cup, Flag | Hole markers. The flag has no collision. |
 | Fairway, Rough, Green, Bunker Sand | Turf with different roll and bounce. Water and lava cost a penalty stroke. |
+| Range Finder | Hold it and look at a block: distance, height and a suggested club with power (`physics/ShotAdvisor`, carry only). |
+| Hole Sign | Place within 4 blocks of a linked tee box: shows hole, par and length, rewritten when the course changes. |
+| Out-of-Bounds Stake | Stakes link to their two closest stakes within 16 blocks (never across another stake). A ball that stops on the other side of the line: penalty stroke, back to where it was hit. Hold a stake or the Course Book to see the lines. |
 
 ## Playing
 
@@ -32,6 +37,10 @@ Plan: [docs/superpowers/plans/2026-10-19-minegolf.md](docs/superpowers/plans/202
 Achievements: own tab with 20 advancements, granted from `stats/GolfAdvancements` (tree in
 `tools/gen_assets.py`). Score achievements use a fair par from the hole length (`round/GolfRules`).
 Statistics: `stats/GolfStats`, shown under Statistics → General.
+
+Out of bounds: put the stakes of one row closer to each other than to the row on the other side of the
+fairway, every ~8 blocks works well; otherwise a line can close the fairway. The stake geometry is in
+`physics/OutOfBounds`, the stake positions per dimension in `course/StakeIndex`.
 
 To stop early, press **Leave round** in the Course Book (or `/minegolf leave`); the others play on.
 

@@ -1,0 +1,77 @@
+{
+  "textures": {
+    "particle": "minegolf:block/oob_stake",
+    "stake": "minegolf:block/oob_stake"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        14,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            2,
+            9,
+            16
+          ],
+          "texture": "#stake"
+        },
+        "south": {
+          "uv": [
+            7,
+            2,
+            9,
+            16
+          ],
+          "texture": "#stake"
+        },
+        "east": {
+          "uv": [
+            7,
+            2,
+            9,
+            16
+          ],
+          "texture": "#stake"
+        },
+        "west": {
+          "uv": [
+            7,
+            2,
+            9,
+            16
+          ],
+          "texture": "#stake"
+        },
+        "up": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#stake"
+        },
+        "down": {
+          "uv": [
+            7,
+            7,
+            9,
+            9
+          ],
+          "texture": "#stake",
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

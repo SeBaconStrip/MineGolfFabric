@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 – course tools
+
+- Range Finder: distance, height difference and a suggested club with power for the block you look at; aim at
+  the flag to measure to the cup
+- Hole Sign: placed next to a tee box it shows hole number, par and length and follows Course Book changes
+- Out-of-Bounds Stakes: stakes form boundary lines; a ball that stops beyond one costs a penalty stroke and is
+  replayed from where it was hit. Holding a stake or the Course Book shows the lines
+
 ## 0.1.0 – first release (Minecraft 26.3)
 
 - Clubs: Driver, Iron, Wedge, Putter with hold-to-charge swing, power bar and aim line

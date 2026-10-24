@@ -195,17 +195,22 @@ public final class RoundManager {
 	}
 
 	public void onPenalty(GolfBallEntity ball) {
+		onPenalty(ball, "minegolf.msg.penalty", "minegolf.msg.practice_hazard");
+	}
+
+	/** One penalty stroke in a round; in practice only the message. The ball has already been put back. */
+	public void onPenalty(GolfBallEntity ball, String roundMessage, String practiceMessage) {
 		ServerPlayer owner = ball.ownerPlayer();
 		Round round = roundFor(ball);
 		if (round == null) {
-			if (owner != null) owner.sendOverlayMessage(Component.translatable("minegolf.msg.practice_hazard"));
+			if (owner != null) owner.sendOverlayMessage(Component.translatable(practiceMessage));
 			return;
 		}
 		UUID id = ball.ownerId();
 		if (id == null) return;
 		round.card.addStroke(id, round.currentHole);
 		if (owner != null) {
-			owner.sendOverlayMessage(Component.translatable("minegolf.msg.penalty"));
+			owner.sendOverlayMessage(Component.translatable(roundMessage));
 			owner.awardStat(GolfStats.PENALTY_STROKES);
 		}
 		if (round.card.reachedCap(id, round.currentHole)) capOut(round, id);

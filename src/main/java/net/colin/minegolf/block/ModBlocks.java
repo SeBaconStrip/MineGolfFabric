@@ -12,6 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
@@ -26,6 +27,14 @@ public class ModBlocks {
 	public static final Block FLAG = register("flag", FlagBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).noCollision().instabreak()
 					.sound(SoundType.WOOD).pushReaction(PushReaction.POPPED));
+
+	public static final Block OOB_STAKE = register("oob_stake", OutOfBoundsStakeBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).noCollision().instabreak()
+					.sound(SoundType.WOOD).pushReaction(PushReaction.POPPED));
+
+	public static final Block HOLE_SIGN = register("hole_sign", HoleSignBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.SAND).forceSolidOn().instrument(NoteBlockInstrument.BASS)
+					.noCollision().strength(1.0F).ignitedByLava());
 
 	public static final Block FAIRWAY = register("fairway", Block::new, turf());
 	public static final Block ROUGH = register("rough", Block::new, turf());
@@ -54,5 +63,7 @@ public class ModBlocks {
 
 	public static void register() {
 		MineGolf.LOGGER.debug("Registering blocks");
+		// The vanilla sign block entity and renderer draw the hole sign
+		BlockEntityTypes.SIGN.addValidBlock(HOLE_SIGN);
 	}
 }

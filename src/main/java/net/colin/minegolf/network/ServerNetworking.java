@@ -2,14 +2,19 @@ package net.colin.minegolf.network;
 
 import net.colin.minegolf.course.Course;
 import net.colin.minegolf.course.CourseSavedData;
+import net.colin.minegolf.course.HoleSigns;
 import net.colin.minegolf.item.CourseBookItem;
 import net.colin.minegolf.item.GolfBagItem;
 import net.colin.minegolf.item.ModComponents;
 import net.colin.minegolf.round.RoundManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 /** Handles serverbound payloads. Every handler re-checks what the player holds and may do. */
 public final class ServerNetworking {
@@ -57,6 +62,8 @@ public final class ServerNetworking {
 			player.sendOverlayMessage(Component.translatable("minegolf.msg.not_owner"));
 			return;
 		}
+		ServerLevel level = player.level();
+		List<BlockPos> teesBefore = HoleSigns.tees(level, course);
 		switch (action.action()) {
 			case ModPayloads.CourseAction.PAR_UP -> course.changePar(action.value(), 1);
 			case ModPayloads.CourseAction.PAR_DOWN -> course.changePar(action.value(), -1);
@@ -83,6 +90,7 @@ public final class ServerNetworking {
 			}
 		}
 		data.setDirty();
+		HoleSigns.refreshAround(level, teesBefore);
 		CourseBookItem.sendView(player, course);
 	}
 }

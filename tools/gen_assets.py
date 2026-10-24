@@ -18,7 +18,7 @@ DATA = f"{RES}/data/{NS}"
 def write_json(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(obj, f, indent=2)
+        json.dump(obj, f, indent=2, ensure_ascii=False)
         f.write("\n")
 
 
@@ -176,6 +176,48 @@ def flag_item():
     return img
 
 
+def range_finder_item():
+    """Grey laser rangefinder with a lens and a red trigger."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(5, 11):
+        for x in range(2, 13):
+            edge = y in (5, 10) or x in (2, 12)
+            img.putpixel((x, y), (70, 74, 80, 255) if edge else (120, 126, 134, 255))
+    for y in range(6, 10):
+        for x in range(12, 15):
+            img.putpixel((x, y), (40, 40, 46, 255))
+    img.putpixel((13, 7), (120, 200, 255, 255))
+    img.putpixel((13, 8), (80, 160, 230, 255))
+    for x in range(3, 6):
+        img.putpixel((x, 4), (90, 94, 100, 255))
+    img.putpixel((8, 4), (210, 40, 40, 255))
+    img.putpixel((9, 4), (210, 40, 40, 255))
+    for y in range(11, 14):
+        img.putpixel((5, y), (70, 74, 80, 255))
+        img.putpixel((6, y), (90, 94, 100, 255))
+    return img
+
+
+def oob_stake_block():
+    """White painted stake, a little darker at the bottom where it sits in the ground."""
+    rnd = random.Random(21)
+    img = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            base = (236, 236, 232) if y < 12 else (200, 196, 186)
+            img.putpixel((x, y), shade(base, rnd.randint(-6, 4)) + (255,))
+    return img
+
+
+def oob_stake_item():
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(1, 16):
+        for x in (7, 8):
+            c = (240, 240, 236) if y < 13 else (190, 186, 176)
+            img.putpixel((x, y), shade(c, -25 if x == 8 else 0) + (255,))
+    return img
+
+
 GREEN_RGB = (96, 188, 72)
 FAIRWAY_RGB = (90, 165, 60)
 ROUGH_RGB = (58, 112, 40)
@@ -241,6 +283,9 @@ def textures():
     save(bag_item(), f"{i}/golf_bag.png")
     save(book_item(), f"{i}/course_book.png")
     save(flag_item(), f"{i}/flag.png")
+    save(range_finder_item(), f"{i}/range_finder.png")
+    save(oob_stake_block(), f"{b}/oob_stake.png")
+    save(oob_stake_item(), f"{i}/oob_stake.png")
     save(icon().resize((128, 128), Image.NEAREST), f"{ASSETS}/icon.png")
     save(icon().resize((512, 512), Image.NEAREST), "docs/publish/icon-512.png")
 
@@ -248,8 +293,10 @@ def textures():
 # ---------------------------------------------------------------- models
 
 TURF = ["fairway", "rough", "green"]
-ITEMS = ["golf_ball", "driver", "iron", "wedge", "putter", "golf_bag", "course_book"]
-BLOCKS = TURF + ["bunker_sand", "cup", "tee_box", "flag"]
+ITEMS = ["golf_ball", "driver", "iron", "wedge", "putter", "golf_bag", "course_book", "range_finder"]
+BLOCKS = TURF + ["bunker_sand", "cup", "tee_box", "flag", "oob_stake"]
+# Blocks whose item shows a flat item texture instead of the block model
+FLAT_ITEM_BLOCKS = ["flag", "oob_stake"]
 
 
 def models():
@@ -277,10 +324,23 @@ def models():
         "textures": {"particle": f"{NS}:block/flag_cloth", "pole": f"{NS}:block/flag_pole", "cloth": f"{NS}:block/flag_cloth"},
         "elements": [pole, cloth]})
 
+    stake = {"from": [7, 0, 7], "to": [9, 14, 9], "faces": {
+        f: {"uv": [7, 2, 9, 16], "texture": "#stake"} for f in ("north", "south", "east", "west")}}
+    stake["faces"]["up"] = {"uv": [7, 7, 9, 9], "texture": "#stake"}
+    stake["faces"]["down"] = {"uv": [7, 7, 9, 9], "texture": "#stake", "cullface": "down"}
+    write_json(f"{ASSETS}/models/block/oob_stake.json", {
+        "textures": {"particle": f"{NS}:block/oob_stake", "stake": f"{NS}:block/oob_stake"},
+        "elements": [stake]})
+
     for b in BLOCKS:
         write_json(f"{ASSETS}/blockstates/{b}.json", {"variants": {"": {"model": f"{NS}:block/{b}"}}})
+    # The hole sign looks like a birch sign; same rotation table as vanilla
+    write_json(f"{ASSETS}/blockstates/hole_sign.json", {"variants": {
+        f"rotation={r}": dict({"model": f"minecraft:block/birch_sign_rot_{r % 4}"}, **({"y": r // 4 * 90} if r >= 4 else {}))
+        for r in range(16)}})
+    write_json(f"{ASSETS}/items/hole_sign.json", {"model": {"type": "minecraft:model", "model": "minecraft:item/birch_sign"}})
 
-    for it in ITEMS + ["flag"]:
+    for it in ITEMS + FLAT_ITEM_BLOCKS:
         parent = "minecraft:item/handheld" if it in ("driver", "iron", "wedge", "putter") else "minecraft:item/generated"
         write_json(f"{ASSETS}/models/item/{it}.json", {"parent": parent, "textures": {"layer0": f"{NS}:item/{it}"}})
 
@@ -290,14 +350,14 @@ def models():
             model["tints"] = [{"type": "minecraft:dye", "default": -1}]
         write_json(f"{ASSETS}/items/{it}.json", {"model": model})
     for b in BLOCKS:
-        model = f"{NS}:item/flag" if b == "flag" else f"{NS}:block/{b}"
+        model = f"{NS}:item/{b}" if b in FLAT_ITEM_BLOCKS else f"{NS}:block/{b}"
         write_json(f"{ASSETS}/items/{b}.json", {"model": {"type": "minecraft:model", "model": model}})
 
 
 # ---------------------------------------------------------------- data
 
 def loot_tables():
-    for b in BLOCKS:
+    for b in BLOCKS + ["hole_sign"]:
         write_json(f"{DATA}/loot_table/blocks/{b}.json", {
             "type": "minecraft:block",
             "pools": [{"rolls": 1, "condition": {"type": "minecraft:survives_explosion"},
@@ -317,6 +377,7 @@ def tags():
     # 26.3 decides from this tag whether a block counts as ground for heightmaps (mobs, rain, placement)
     write_json(f"{RES}/data/minecraft/tags/block/blocks_motion_no_leaves.json", {
         "replace": False, "values": [f"{NS}:{b}" for b in TURF + ["cup", "bunker_sand"]]})
+    write_json(f"{RES}/data/minecraft/tags/block/mineable/axe.json", {"replace": False, "values": [f"{NS}:hole_sign"]})
     write_json(f"{DATA}/tags/item/clubs.json", {"values": [f"{NS}:{c}" for c in ("driver", "iron", "wedge", "putter")]})
 
 
@@ -340,6 +401,7 @@ UNLOCKED_BY = {
     "tee_box": "minecraft:green_carpet", "flag": "minecraft:red_wool",
     "fairway": "minecraft:grass_block", "rough": "minecraft:grass_block", "green": f"{NS}:fairway",
     "bunker_sand": "minecraft:sand", "cup": f"{NS}:green",
+    "range_finder": "minecraft:redstone", "hole_sign": "minecraft:birch_sign", "oob_stake": "minecraft:white_dye",
 }
 
 
@@ -446,6 +508,10 @@ def recipes():
     shapeless("green", [f"{NS}:fairway"] * 4 + ["minecraft:bone_meal"], "green", 4, "building")
     shapeless("bunker_sand", ["minecraft:sand"] * 4 + ["minecraft:bone_meal"], "bunker_sand", 4, "building")
     shapeless("cup", [f"{NS}:green", "minecraft:iron_ingot"], "cup", 1, "building")
+    shaped("range_finder", ["IGI", "IRI"], {"I": "minecraft:iron_ingot", "G": "minecraft:glass_pane", "R": "minecraft:redstone"},
+           "range_finder")
+    shapeless("hole_sign", ["minecraft:birch_sign", "minecraft:paper"], "hole_sign", 1, "building")
+    shaped("oob_stake", ["D", "S", "S"], {"D": "minecraft:white_dye", "S": stick}, "oob_stake", 4, "building")
 
 
 if __name__ == "__main__":

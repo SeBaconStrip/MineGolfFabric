@@ -1,6 +1,7 @@
 package net.colin.minegolf.entity;
 
 import net.colin.minegolf.block.ModBlocks;
+import net.colin.minegolf.course.StakeIndex;
 import net.colin.minegolf.item.ModItems;
 import net.colin.minegolf.physics.BallPhysics;
 import net.colin.minegolf.physics.BallState;
@@ -131,6 +132,14 @@ public class GolfBallEntity extends Entity implements ItemSupplier {
 		setDeltaMovement(state.vx, state.vy, state.vz);
 		switch (event) {
 			case AT_REST -> {
+				if (shot != null && StakeIndex.isOut(level, shot.x, shot.z, state.x, state.z)) {
+					shot = null;
+					level.playSound(null, getX(), getY(), getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
+					resetToRest();
+					RoundManager.get(level.getServer()).onPenalty(this, "minegolf.msg.out_of_bounds",
+							"minegolf.msg.practice_out_of_bounds");
+					return;
+				}
 				markRest();
 				shotCameToRest(lookup);
 				RoundManager.get(level.getServer()).onBallRest(this);

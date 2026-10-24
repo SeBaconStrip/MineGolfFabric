@@ -4,6 +4,7 @@ import net.colin.minegolf.block.ModBlocks;
 import net.colin.minegolf.course.Course;
 import net.colin.minegolf.course.CourseSavedData;
 import net.colin.minegolf.course.Hole;
+import net.colin.minegolf.course.HoleSigns;
 import net.colin.minegolf.network.ModPayloads;
 import net.colin.minegolf.stats.GolfAdvancements;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -108,6 +109,8 @@ public class CourseBookItem extends Item {
 			return InteractionResult.FAIL;
 		}
 		LINKS.remove(player.getUUID());
+		List<BlockPos> tees = new ArrayList<>(HoleSigns.tees(level, course));
+		tees.add(link.tee);
 		if (link.replace >= 0) {
 			if (link.replace >= course.holes().size()) {
 				player.sendOverlayMessage(Component.translatable("minegolf.msg.link_cancelled"));
@@ -121,6 +124,7 @@ public class CourseBookItem extends Item {
 			player.sendSystemMessage(Component.translatable("minegolf.msg.hole_added", course.holes().size(), Hole.DEFAULT_PAR));
 		}
 		data.setDirty();
+		HoleSigns.refreshAround(level, tees);
 		GolfAdvancements.award(serverPlayer, GolfAdvancements.COURSE_ARCHITECT);
 		sendView(serverPlayer, course);
 		return InteractionResult.SUCCESS;

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minegolf:oob_stake"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "minegolf:blocks/oob_stake"
+}

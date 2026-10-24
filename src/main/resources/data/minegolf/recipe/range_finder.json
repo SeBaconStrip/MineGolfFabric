@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:glass_pane",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "IGI",
+    "IRI"
+  ],
+  "result": {
+    "id": "minegolf:range_finder",
+    "count": 1
+  }
+}

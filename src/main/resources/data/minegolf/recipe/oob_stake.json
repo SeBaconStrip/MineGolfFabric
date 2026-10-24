@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "D": "minecraft:white_dye",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "D",
+    "S",
+    "S"
+  ],
+  "result": {
+    "id": "minegolf:oob_stake",
+    "count": 4
+  }
+}

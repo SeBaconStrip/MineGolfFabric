@@ -3,11 +3,14 @@ package net.colin.minegolf.gametest;
 import com.mojang.serialization.DataResult;
 import net.colin.minegolf.block.ModBlocks;
 import net.colin.minegolf.course.Course;
+import net.colin.minegolf.course.CourseSavedData;
 import net.colin.minegolf.course.Hole;
+import net.colin.minegolf.course.HoleSigns;
 import net.colin.minegolf.entity.GolfBallEntity;
 import net.colin.minegolf.entity.ModEntities;
 import net.colin.minegolf.item.ModItems;
 import net.colin.minegolf.physics.Club;
+import net.colin.minegolf.physics.ShotAdvisor;
 import net.colin.minegolf.stats.GolfAdvancements;
 import net.colin.minegolf.stats.GolfStats;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -15,6 +18,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -27,6 +31,8 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.phys.Vec3;
 
 import java.lang.reflect.Field;
@@ -142,7 +148,7 @@ public class MineGolfGameTests {
 			count++;
 			helper.assertTrue(rewarded.contains(recipe.id()), "no recipe book unlock for " + recipe.id().identifier());
 		}
-		helper.assertTrue(count == 15, "expected 15 MineGolf recipes, found " + count);
+		helper.assertTrue(count == 18, "expected 18 MineGolf recipes, found " + count);
 		helper.succeed();
 	}
 
@@ -226,5 +232,49 @@ public class MineGolfGameTests {
 		rounds.quit(player);
 		helper.assertTrue(rounds.roundOf(player) == null, "player should have left the round");
 		helper.succeed();
+	}
+
+	@GameTest
+	public void holeSignShowsHoleAndFollowsParChange(GameTestHelper helper) {
+		helper.setBlock(1, 1, 1, ModBlocks.TEE_BOX);
+		helper.setBlock(6, 0, 6, ModBlocks.CUP);
+		BlockPos tee = helper.absolutePos(new BlockPos(1, 1, 1));
+		Course course = CourseSavedData.get(helper.getLevel().getServer()).create("Sign Test Links", UUID.randomUUID());
+		course.addHole(new Hole(helper.getLevel().dimension(), tee, helper.absolutePos(new BlockPos(6, 0, 6)), 3));
+		helper.setBlock(3, 1, 1, ModBlocks.HOLE_SIGN);
+		BlockPos signPos = helper.absolutePos(new BlockPos(3, 1, 1));
+		HoleSigns.write(helper.getLevel(), signPos);
+
+		SignBlockEntity sign = (SignBlockEntity) helper.getLevel().getBlockEntity(signPos);
+		helper.assertTrue(sign != null && sign.isWaxed(), "hole sign should be locked");
+		int holeNumber = course.holes().size();
+		helper.assertValueEqual(sign.getText(SignTextSlot.FRONT).getMessages(false).get(0),
+				Component.translatable("minegolf.sign.hole", holeNumber), "hole line");
+		helper.assertValueEqual(sign.getText(SignTextSlot.FRONT).getMessages(false).get(1),
+				Component.translatable("minegolf.sign.par", 3), "par line");
+		helper.assertValueEqual(sign.getText(SignTextSlot.BACK).getMessages(false).get(3), Component.literal("Sign Test Links"), "back side");
+
+		course.changePar(0, 1);
+		HoleSigns.refreshAround(helper.getLevel(), HoleSigns.tees(helper.getLevel(), course));
+		helper.assertValueEqual(sign.getText(SignTextSlot.FRONT).getMessages(false).get(1),
+				Component.translatable("minegolf.sign.par", 4), "par line after change");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 400)
+	public void ballBehindStakeLineIsOutOfBounds(GameTestHelper helper) {
+		lane(helper, ModBlocks.GREEN);
+		// A short boundary across the lane; the ball rolls through the middle stake
+		for (int x = 0; x < 3; x++) helper.setBlock(x, 1, 4, ModBlocks.OOB_STAKE);
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		GolfBallEntity ball = ownedBall(helper, player);
+		ball.hit(Club.PUTTER, ShotAdvisor.suggest(5, 0, false, true).power(), 0F);
+		// A slow putt on the green takes a while to settle
+		helper.runAfterDelay(300, () -> {
+			helper.assertTrue(ball.isResting(), "ball should rest again, at z=" + relativeZ(helper, ball) + " y=" + (ball.getY() - helper.absolutePos(BlockPos.ZERO).getY()) + " removed=" + ball.isRemoved());
+			helper.assertTrue(Math.abs(relativeZ(helper, ball) - 1.5) < 0.01,
+					"ball should be back where it was hit, was at z=" + relativeZ(helper, ball));
+			helper.succeed();
+		});
 	}
 }

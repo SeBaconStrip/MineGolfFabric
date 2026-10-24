@@ -2,6 +2,7 @@ package net.colin.minegolf;
 
 import net.colin.minegolf.block.ModBlocks;
 import net.colin.minegolf.command.MineGolfCommand;
+import net.colin.minegolf.course.StakeIndex;
 import net.colin.minegolf.dev.DemoCourseBuilder;
 import net.colin.minegolf.entity.ModEntities;
 import net.colin.minegolf.item.CourseBookItem;
@@ -14,6 +15,7 @@ import net.colin.minegolf.stats.GolfStats;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class MineGolf implements ModInitializer {
 	public static final String MOD_ID = "minegolf";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	private static final int STAKE_LINE_INTERVAL = 10;
 
 	@Override
 	public void onInitialize() {
@@ -41,5 +44,8 @@ public class MineGolf implements ModInitializer {
 			CourseBookItem.forget(handler.getPlayer().getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> RoundManager.reset());
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % STAKE_LINE_INTERVAL == 0) server.getPlayerList().getPlayers().forEach(StakeIndex::showLines);
+		});
 	}
 }

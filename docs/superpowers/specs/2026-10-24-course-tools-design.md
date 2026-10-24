@@ -39,7 +39,9 @@ No new achievements or statistics.
 
 - `OutOfBoundsStakeBlock`: thin white post, no collision (like the Flag), instabreak.
 - Lines: every stake connects to its two closest stakes that are at most 16 blocks away (horizontal distance; y is
-  ignored). An edge exists if either end chose the other.
+  ignored), skipping stakes that would need a line across another stake (within 1 block of it); otherwise the
+  ends of a row would get a second, overlapping line that cancels the first. An edge exists if either end chose
+  the other.
 - Rule: when a ball in a round or in practice comes to rest, the segment from where the shot was hit to where it
   stopped is tested against all lines near it. An odd number of crossings means out of bounds:
   - In a round: 1 penalty stroke and the ball goes back to where it was hit (same path as a water hazard).

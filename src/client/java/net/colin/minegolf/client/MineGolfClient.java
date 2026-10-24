@@ -31,6 +31,7 @@ public class MineGolfClient implements ClientModInitializer {
 				if (client.player != null) ClientPlayNetworking.send(ModPayloads.CycleClub.INSTANCE);
 			}
 			AimLine.tick(client);
+			RangeFinderHud.tick(client);
 		});
 
 		ClientPlayNetworking.registerGlobalReceiver(ModPayloads.OpenCreateCourse.TYPE,

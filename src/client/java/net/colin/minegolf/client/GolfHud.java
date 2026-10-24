@@ -32,6 +32,7 @@ public final class GolfHud {
 		if (player == null) return;
 		powerBar(graphics, mc.font, player);
 		roundPanel(graphics, mc.font, player);
+		RangeFinderHud.extract(graphics, mc.font);
 	}
 
 	private static void powerBar(GuiGraphicsExtractor g, Font font, LocalPlayer player) {
