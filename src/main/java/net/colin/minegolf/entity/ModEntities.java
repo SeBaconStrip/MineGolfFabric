@@ -22,6 +22,16 @@ public class ModEntities {
 					.updateInterval(1)
 					.build(GOLF_BALL_KEY));
 
+	private static final ResourceKey<EntityType<?>> GOLF_CART_KEY =
+			ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MineGolf.MOD_ID, "golf_cart"));
+
+	public static final EntityType<GolfCartEntity> GOLF_CART = Registry.register(BuiltInRegistries.ENTITY_TYPE, GOLF_CART_KEY,
+			EntityType.Builder.<GolfCartEntity>of(GolfCartEntity::new, MobCategory.MISC)
+					.noLootTable()
+					.sized(1.4F, 1.0F)
+					.clientTrackingRange(10)
+					.build(GOLF_CART_KEY));
+
 	public static void register() {
 		MineGolf.LOGGER.debug("Registering entities");
 	}

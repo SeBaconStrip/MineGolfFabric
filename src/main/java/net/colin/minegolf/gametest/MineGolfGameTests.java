@@ -7,7 +7,9 @@ import net.colin.minegolf.course.CourseSavedData;
 import net.colin.minegolf.course.Hole;
 import net.colin.minegolf.course.HoleSigns;
 import net.colin.minegolf.entity.GolfBallEntity;
+import net.colin.minegolf.entity.GolfCartEntity;
 import net.colin.minegolf.entity.ModEntities;
+import net.colin.minegolf.item.GolfBagItem;
 import net.colin.minegolf.item.ModItems;
 import net.colin.minegolf.physics.Club;
 import net.colin.minegolf.physics.ShotAdvisor;
@@ -16,6 +18,8 @@ import net.colin.minegolf.stats.GolfStats;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
@@ -25,7 +29,11 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
@@ -33,6 +41,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignTextSlot;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.lang.reflect.Field;
@@ -148,7 +158,7 @@ public class MineGolfGameTests {
 			count++;
 			helper.assertTrue(rewarded.contains(recipe.id()), "no recipe book unlock for " + recipe.id().identifier());
 		}
-		helper.assertTrue(count == 18, "expected 18 MineGolf recipes, found " + count);
+		helper.assertTrue(count == 19, "expected 19 MineGolf recipes, found " + count);
 		helper.succeed();
 	}
 
@@ -276,5 +286,60 @@ public class MineGolfGameTests {
 					"ball should be back where it was hit, was at z=" + relativeZ(helper, ball));
 			helper.succeed();
 		});
+	}
+
+	private static GolfCartEntity cartAt(GameTestHelper helper, double x, double z) {
+		GolfCartEntity cart = new GolfCartEntity(ModEntities.GOLF_CART, helper.getLevel());
+		cart.setPos(helper.absoluteVec(new Vec3(x, 1, z)));
+		helper.getLevel().addFreshEntity(cart);
+		return cart;
+	}
+
+	private static ItemStack bagWith(ItemStack... items) {
+		ItemStack bag = new ItemStack(ModItems.GOLF_BAG);
+		bag.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(List.of(items)));
+		return bag;
+	}
+
+	@GameTest
+	public void cartItemPlacesCart(GameTestHelper helper) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) helper.setBlock(x, 0, z, ModBlocks.FAIRWAY);
+		}
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.GOLF_CART));
+		BlockPos ground = helper.absolutePos(new BlockPos(2, 0, 2));
+		Vec3 top = Vec3.atBottomCenterOf(ground.above());
+		ModItems.GOLF_CART.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(top, Direction.UP, ground, false)));
+		List<GolfCartEntity> carts = helper.getLevel().getEntitiesOfClass(GolfCartEntity.class, new AABB(ground).inflate(2));
+		helper.assertTrue(carts.size() == 1, "expected one cart, found " + carts.size());
+		helper.succeed();
+	}
+
+	@GameTest
+	public void cartHoldsBagAndDropsItWhenBroken(GameTestHelper helper) {
+		GolfCartEntity cart = cartAt(helper, 2.5, 2.5);
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemInHand(InteractionHand.MAIN_HAND, bagWith(new ItemStack(ModItems.PUTTER)));
+		cart.interact(player, InteractionHand.MAIN_HAND, Vec3.ZERO);
+		helper.assertTrue(cart.hasBag(), "bag should be on the cart");
+		helper.assertTrue(player.getMainHandItem().isEmpty(), "bag should have left the hand");
+
+		cart.destroy(helper.getLevel(), ModItems.GOLF_CART);
+		List<ItemEntity> drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class, cart.getBoundingBox().inflate(2));
+		helper.assertTrue(drops.stream().anyMatch(e -> e.getItem().is(ModItems.GOLF_CART)), "cart item should drop");
+		helper.assertTrue(drops.stream().anyMatch(e -> e.getItem().is(ModItems.GOLF_BAG)), "bag should drop with the cart");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void clubKeyUsesCartBag(GameTestHelper helper) {
+		GolfCartEntity cart = cartAt(helper, 2.5, 2.5);
+		cart.setBag(bagWith(ItemStack.EMPTY, new ItemStack(ModItems.IRON)));
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		helper.assertTrue(player.startRiding(cart), "player should get into the cart");
+		GolfBagItem.cycleClub(player);
+		helper.assertTrue(player.getMainHandItem().is(ModItems.IRON), "iron should come from the cart's bag");
+		helper.succeed();
 	}
 }

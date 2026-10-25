@@ -28,6 +28,7 @@ public class ModItems {
 			new Item.Properties().stacksTo(1).component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
 	public static final Item COURSE_BOOK = register("course_book", CourseBookItem::new, new Item.Properties().stacksTo(1));
 	public static final Item RANGE_FINDER = register("range_finder", Item::new, new Item.Properties().stacksTo(1));
+	public static final Item GOLF_CART = register("golf_cart", GolfCartItem::new, new Item.Properties().stacksTo(1));
 
 	public static final ResourceKey<CreativeModeTab> TAB_KEY =
 			ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath(MineGolf.MOD_ID, "golf"));
@@ -54,6 +55,7 @@ public class ModItems {
 					output.accept(GOLF_BAG);
 					output.accept(COURSE_BOOK);
 					output.accept(RANGE_FINDER);
+					output.accept(GOLF_CART);
 					output.accept(ModBlocks.TEE_BOX);
 					output.accept(ModBlocks.CUP);
 					output.accept(ModBlocks.FLAG);

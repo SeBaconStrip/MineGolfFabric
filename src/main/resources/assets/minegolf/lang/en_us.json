@@ -8,6 +8,8 @@
   "item.minegolf.golf_bag": "Golf Bag",
   "item.minegolf.course_book": "Course Book",
   "item.minegolf.range_finder": "Range Finder",
+  "item.minegolf.golf_cart": "Golf Cart",
+  "entity.minegolf.golf_cart": "Golf Cart",
   "block.minegolf.tee_box": "Tee Box",
   "block.minegolf.cup": "Cup",
   "block.minegolf.flag": "Flag",

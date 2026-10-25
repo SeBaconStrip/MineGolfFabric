@@ -6,7 +6,9 @@ or with friends using clubs, balls and a golf bag.
 Design: [docs/superpowers/specs/2026-10-19-minegolf-design.md](docs/superpowers/specs/2026-10-19-minegolf-design.md) ·
 Plan: [docs/superpowers/plans/2026-10-19-minegolf.md](docs/superpowers/plans/2026-10-19-minegolf.md) ·
 Course tools (0.2.0): [spec](docs/superpowers/specs/2026-10-24-course-tools-design.md),
-[plan](docs/superpowers/plans/2026-10-24-course-tools.md)
+[plan](docs/superpowers/plans/2026-10-24-course-tools.md) ·
+Golf cart (0.3.0): [spec](docs/superpowers/specs/2026-10-25-golf-cart-design.md),
+[plan](docs/superpowers/plans/2026-10-25-golf-cart.md)
 
 ## Content
 
@@ -19,6 +21,7 @@ Course tools (0.2.0): [spec](docs/superpowers/specs/2026-10-24-course-tools-desi
 | Tee Box, Cup, Flag | Hole markers. The flag has no collision. |
 | Fairway, Rough, Green, Bunker Sand | Turf with different roll and bounce. Water and lava cost a penalty stroke. |
 | Range Finder | Hold it and look at a block: distance, height and a suggested club with power (`physics/ShotAdvisor`, carry only). |
+| Golf Cart | Place it on a block, right-click to ride (2 seats, first one drives). W/S gas and brake/reverse, A/D steer (`physics/CartPhysics`). Right-click with a golf bag to put it on the back, sneak + right-click with an empty hand to take it; while riding, `R` takes clubs from that bag. |
 | Hole Sign | Place within 4 blocks of a linked tee box: shows hole, par and length, rewritten when the course changes. |
 | Out-of-Bounds Stake | Stakes link to their two closest stakes within 16 blocks (never across another stake). A ball that stops on the other side of the line: penalty stroke, back to where it was hit. Hold a stake or the Course Book to see the lines. |
 

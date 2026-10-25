@@ -24,6 +24,8 @@ bunker.
 - **Rounds with friends** – players within 32 blocks get a clickable `[Join]` in chat. Everyone plays their
   own ball at the same time; the next hole starts once all have holed out. The HUD shows hole, par, strokes
   and distance to the cup, and a scorecard with birdies, bogeys and totals opens at the end.
+- **Golf Cart** – drive the course in a two-seat cart: W/S for gas and brake, A/D to steer. Put your golf bag on
+  the back and swap clubs with `R` without leaving your seat.
 - **Range Finder** – look at any block: distance, height difference and a suggested club with power, worked
   out with the same physics as the ball. Aim at the flag to measure to the cup.
 - **Hole Signs** – place one next to a tee box and it writes hole number, par and length by itself, and keeps
@@ -87,6 +89,7 @@ hole for double par).
 | Bunker Sand ×4 | 4 Sand + Bone Meal |
 | Cup | Green + Iron Ingot |
 | Range Finder | Iron, Glass Pane, Iron above Iron, Redstone, Iron |
+| Golf Cart | 3 White Wool above Iron, Minecart, Iron |
 | Hole Sign | Birch Sign + Paper |
 | Out-of-Bounds Stake ×4 | White Dye above 2 Sticks |
 

@@ -218,6 +218,53 @@ def oob_stake_item():
     return img
 
 
+CART_ZONES = {  # top-left of each 128x64 zone in the cart texture -> colour, matches GolfCartModel
+    (0, 0): (236, 230, 208),     # body
+    (128, 0): (46, 112, 64),     # seat
+    (0, 64): (34, 34, 38),       # tyres, steering wheel
+    (128, 64): (244, 244, 238),  # roof
+    (0, 128): (122, 74, 42),     # bag
+    (128, 128): (186, 188, 194), # posts, club heads
+}
+
+
+def golf_cart_texture():
+    """256x256 entity texture made of single-colour zones with a little noise."""
+    rnd = random.Random(31)
+    img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    for (zx, zy), rgb in CART_ZONES.items():
+        for y in range(zy, zy + 64):
+            for x in range(zx, zx + 128):
+                c = rgb
+                if (zx, zy) == (128, 64) and (y - zy) % 6 < 2:
+                    c = (60, 140, 80)  # green stripes on the roof
+                img.putpixel((x, y), shade(c, rnd.randint(-6, 6)) + (255,))
+    return img
+
+
+def golf_cart_item():
+    """Side view: cream body, green seat, white roof on posts, black wheels."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for x in range(1, 15):
+        img.putpixel((x, 3), (244, 244, 238, 255))
+        img.putpixel((x, 4), (60, 140, 80, 255))
+    for y in range(5, 10):
+        img.putpixel((2, y), (186, 188, 194, 255))
+        img.putpixel((13, y), (186, 188, 194, 255))
+    for x in range(5, 11):
+        img.putpixel((x, 8), (46, 112, 64, 255))
+        img.putpixel((9, 6), (46, 112, 64, 255))
+        img.putpixel((9, 7), (46, 112, 64, 255))
+    for y in range(9, 12):
+        for x in range(1, 15):
+            img.putpixel((x, y), shade((236, 230, 208), -12 if y == 11 else 0) + (255,))
+    for cx in (4, 11):
+        for y in range(11, 15):
+            for x in range(cx - 1, cx + 2):
+                img.putpixel((x, y), (34, 34, 38, 255))
+    return img
+
+
 GREEN_RGB = (96, 188, 72)
 FAIRWAY_RGB = (90, 165, 60)
 ROUGH_RGB = (58, 112, 40)
@@ -286,6 +333,8 @@ def textures():
     save(range_finder_item(), f"{i}/range_finder.png")
     save(oob_stake_block(), f"{b}/oob_stake.png")
     save(oob_stake_item(), f"{i}/oob_stake.png")
+    save(golf_cart_item(), f"{i}/golf_cart.png")
+    save(golf_cart_texture(), f"{ASSETS}/textures/entity/golf_cart.png")
     save(icon().resize((128, 128), Image.NEAREST), f"{ASSETS}/icon.png")
     save(icon().resize((512, 512), Image.NEAREST), "docs/publish/icon-512.png")
 
@@ -293,7 +342,7 @@ def textures():
 # ---------------------------------------------------------------- models
 
 TURF = ["fairway", "rough", "green"]
-ITEMS = ["golf_ball", "driver", "iron", "wedge", "putter", "golf_bag", "course_book", "range_finder"]
+ITEMS = ["golf_ball", "driver", "iron", "wedge", "putter", "golf_bag", "course_book", "range_finder", "golf_cart"]
 BLOCKS = TURF + ["bunker_sand", "cup", "tee_box", "flag", "oob_stake"]
 # Blocks whose item shows a flat item texture instead of the block model
 FLAT_ITEM_BLOCKS = ["flag", "oob_stake"]
@@ -402,6 +451,7 @@ UNLOCKED_BY = {
     "fairway": "minecraft:grass_block", "rough": "minecraft:grass_block", "green": f"{NS}:fairway",
     "bunker_sand": "minecraft:sand", "cup": f"{NS}:green",
     "range_finder": "minecraft:redstone", "hole_sign": "minecraft:birch_sign", "oob_stake": "minecraft:white_dye",
+    "golf_cart": "minecraft:minecart",
 }
 
 
@@ -512,6 +562,8 @@ def recipes():
            "range_finder")
     shapeless("hole_sign", ["minecraft:birch_sign", "minecraft:paper"], "hole_sign", 1, "building")
     shaped("oob_stake", ["D", "S", "S"], {"D": "minecraft:white_dye", "S": stick}, "oob_stake", 4, "building")
+    shaped("golf_cart", ["WWW", "IMI"], {"W": "minecraft:white_wool", "I": "minecraft:iron_ingot", "M": "minecraft:minecart"},
+           "golf_cart")
 
 
 if __name__ == "__main__":

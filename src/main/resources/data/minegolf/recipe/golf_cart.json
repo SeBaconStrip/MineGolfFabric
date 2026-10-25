@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "W": "minecraft:white_wool",
+    "I": "minecraft:iron_ingot",
+    "M": "minecraft:minecart"
+  },
+  "pattern": [
+    "WWW",
+    "IMI"
+  ],
+  "result": {
+    "id": "minegolf:golf_cart",
+    "count": 1
+  }
+}

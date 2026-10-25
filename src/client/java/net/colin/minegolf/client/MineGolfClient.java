@@ -2,6 +2,8 @@ package net.colin.minegolf.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.colin.minegolf.MineGolf;
+import net.colin.minegolf.client.cart.GolfCartModel;
+import net.colin.minegolf.client.cart.GolfCartRenderer;
 import net.colin.minegolf.entity.ModEntities;
 import net.colin.minegolf.network.ModPayloads;
 import net.fabricmc.api.ClientModInitializer;
@@ -9,6 +11,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -22,6 +25,8 @@ public class MineGolfClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		EntityRenderers.register(ModEntities.GOLF_BALL, context -> new ThrownItemRenderer<>(context, 0.6F, false));
+		ModelLayerRegistry.registerModelLayer(GolfCartModel.LAYER, GolfCartModel::createBodyLayer);
+		EntityRenderers.register(ModEntities.GOLF_CART, GolfCartRenderer::new);
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MineGolf.MOD_ID, "hud"), GolfHud::extract);
 
 		KeyMapping cycleClub = KeyMappingHelper.registerKeyMapping(

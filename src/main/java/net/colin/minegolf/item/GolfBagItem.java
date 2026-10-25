@@ -1,6 +1,7 @@
 package net.colin.minegolf.item;
 
 import net.colin.minegolf.physics.Club;
+import net.colin.minegolf.entity.GolfCartEntity;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +35,8 @@ public class GolfBagItem extends Item {
 	}
 
 	/**
-	 * Swaps the club in the main hand with the next club in the first bag found in the inventory.
+	 * Swaps the club in the main hand with the next club in the first bag found in the inventory, or in the bag on
+	 * the cart the player rides.
 	 * An empty hand takes the first club in the bag.
 	 */
 	public static void cycleClub(ServerPlayer player) {
@@ -46,6 +48,8 @@ public class GolfBagItem extends Item {
 				break;
 			}
 		}
+		// Riding a cart that carries a bag works like having the bag along
+		if (bag.isEmpty() && player.getVehicle() instanceof GolfCartEntity cart) bag = cart.bag();
 		if (bag.isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("minegolf.msg.no_bag"));
 			return;

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 – golf cart
+
+- Golf Cart: two seats, drives like a car (W/S gas and brake/reverse, A/D steer), climbs one-block steps
+- Holds a golf bag on the back; while riding, `R` swaps clubs from that bag
+- Breaking the cart drops it and the bag
+
 ## 0.2.0 – course tools
 
 - Range Finder: distance, height difference and a suggested club with power for the block you look at; aim at
